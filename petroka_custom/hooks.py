@@ -137,24 +137,22 @@ app_license = "mit"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+	"Task": {
+		"validate": "petroka_custom.doc_event.create_leave_allocation"
+	}
+}
 
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
+scheduler_events = {
 # 	"all": [
 # 		"petroka_custom.tasks.all"
 # 	],
-# 	"daily": [
-# 		"petroka_custom.tasks.daily"
-# 	],
+	"daily": [
+		"petroka_custom.doc_event.expire_leave_allocation"
+	],
 # 	"hourly": [
 # 		"petroka_custom.tasks.hourly"
 # 	],
@@ -164,7 +162,7 @@ app_license = "mit"
 # 	"monthly": [
 # 		"petroka_custom.tasks.monthly"
 # 	],
-# }
+}
 
 # Testing
 # -------
