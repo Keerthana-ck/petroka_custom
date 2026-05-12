@@ -140,7 +140,10 @@ app_license = "mit"
 doc_events = {
 	"Task": {
 		"validate": "petroka_custom.doc_event.create_leave_allocation"
-	}
+	},
+    "Leave Application": {
+        "validate": "petroka_custom.doc_event.validate_bereavement_leave"
+    }
 }
 
 # Scheduled Tasks

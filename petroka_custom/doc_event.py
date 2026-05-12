@@ -183,4 +183,19 @@ def expire_leave_allocation():
 
     frappe.db.commit()
 
-        
+@frappe.whitelist()
+def validate_bereavement_leave(doc, method=None):
+    """This function validates the total leave days for bereavement leave based on the relation of the employee to the deceased."""
+
+    if doc.leave_type != "Bereavement Leave":
+        return
+
+    if doc.custom_relation == "Spouse" and doc.total_leave_days > 5:
+        frappe.throw(
+            "Bereavement Leave for Spouse cannot exceed 5 days."
+        )
+
+    elif doc.custom_relation == "Other Relations" and doc.total_leave_days > 3:
+        frappe.throw(
+            "Bereavement Leave for Other Relations cannot exceed 3 days."
+        )
