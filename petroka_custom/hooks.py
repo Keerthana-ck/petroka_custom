@@ -144,6 +144,7 @@ doc_events = {
     "Leave Application": {
         "validate": "petroka_custom.doc_event.validate_bereavement_leave"
     }
+   
 }
 
 # Scheduled Tasks
@@ -156,6 +157,19 @@ scheduler_events = {
 	"daily": [
 		"petroka_custom.doc_event.expire_leave_allocation"
 	],
+    "hourly": [
+        "petroka_custom.petroka_custom.doctype.zktecho_check_in_logs.zktecho_check_in_logs.enqueue_fetch_and_process_data"
+    ],
+    # "cron": {
+    #     "0 0 * * *": [
+    #         "petroka_custom.petroka_custom.custom_script.zktecho.enqueue_sync_zkteco_logs"
+    #     ]
+    # }
+    "cron": {
+        "0 0 * * *": [
+            "petroka_custom.petroka_custom.custom_script.zkteco.enqueue_sync_zkteco_logs"
+        ]
+    }
 # 	"hourly": [
 # 		"petroka_custom.tasks.hourly"
 # 	],
