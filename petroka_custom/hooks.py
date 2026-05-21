@@ -12,13 +12,13 @@ app_license = "mit"
 
 # Each item in the list will be shown as an app in the apps page
 # add_to_apps_screen = [
-# 	{
-# 		"name": "petroka_custom",
-# 		"logo": "/assets/petroka_custom/logo.png",
-# 		"title": "petroka_custom",
-# 		"route": "/petroka_custom",
-# 		"has_permission": "petroka_custom.api.permission.has_app_permission"
-# 	}
+#   {
+#       "name": "petroka_custom",
+#       "logo": "/assets/petroka_custom/logo.png",
+#       "title": "petroka_custom",
+#       "route": "/petroka_custom",
+#       "has_permission": "petroka_custom.api.permission.has_app_permission"
+#   }
 # ]
 
 # Includes in <head>
@@ -61,7 +61,7 @@ app_license = "mit"
 
 # website user home page (by Role)
 # role_home_page = {
-# 	"Role": "home_page"
+#   "Role": "home_page"
 # }
 
 # Generators
@@ -75,8 +75,8 @@ app_license = "mit"
 
 # add methods and filters to jinja environment
 # jinja = {
-# 	"methods": "petroka_custom.utils.jinja_methods",
-# 	"filters": "petroka_custom.utils.jinja_filters"
+#   "methods": "petroka_custom.utils.jinja_methods",
+#   "filters": "petroka_custom.utils.jinja_filters"
 # }
 
 # Installation
@@ -118,11 +118,11 @@ app_license = "mit"
 # Permissions evaluated in scripted ways
 
 # permission_query_conditions = {
-# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
+#   "Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
 # }
 #
 # has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
+#   "Event": "frappe.desk.doctype.event.event.has_permission",
 # }
 
 # DocType Class
@@ -130,7 +130,7 @@ app_license = "mit"
 # Override standard doctype classes
 
 # override_doctype_class = {
-# 	"ToDo": "custom_app.overrides.CustomToDo"
+#   "ToDo": "custom_app.overrides.CustomToDo"
 # }
 
 # Document Events
@@ -138,9 +138,9 @@ app_license = "mit"
 # Hook on document methods and events
 
 doc_events = {
-	"Task": {
-		"validate": "petroka_custom.doc_event.create_leave_allocation"
-	},
+    "Task": {
+        "validate": "petroka_custom.doc_event.create_leave_allocation"
+    },
     "Leave Application": {
         "validate": "petroka_custom.doc_event.validate_bereavement_leave"
     }
@@ -151,12 +151,12 @@ doc_events = {
 # ---------------
 
 scheduler_events = {
-# 	"all": [
-# 		"petroka_custom.tasks.all"
-# 	],
-	"daily": [
-		"petroka_custom.doc_event.expire_leave_allocation"
-	],
+#   "all": [
+#       "petroka_custom.tasks.all"
+#   ],
+    "daily": [
+        "petroka_custom.doc_event.expire_leave_allocation"
+    ],
     "hourly": [
         "petroka_custom.petroka_custom.doctype.zktecho_check_in_logs.zktecho_check_in_logs.enqueue_fetch_and_process_data"
     ],
@@ -170,15 +170,15 @@ scheduler_events = {
             "petroka_custom.petroka_custom.custom_script.zkteco.enqueue_sync_zkteco_logs"
         ]
     }
-# 	"hourly": [
-# 		"petroka_custom.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"petroka_custom.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"petroka_custom.tasks.monthly"
-# 	],
+#   "hourly": [
+#       "petroka_custom.tasks.hourly"
+#   ],
+#   "weekly": [
+#       "petroka_custom.tasks.weekly"
+#   ],
+#   "monthly": [
+#       "petroka_custom.tasks.monthly"
+#   ],
 }
 
 # Testing
@@ -190,14 +190,14 @@ scheduler_events = {
 # ------------------------------
 #
 # override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "petroka_custom.event.get_events"
+#   "frappe.desk.doctype.event.event.get_events": "petroka_custom.event.get_events"
 # }
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
 # override_doctype_dashboards = {
-# 	"Task": "petroka_custom.task.get_dashboard_data"
+#   "Task": "petroka_custom.task.get_dashboard_data"
 # }
 
 # exempt linked doctypes from being automatically cancelled
@@ -223,38 +223,38 @@ scheduler_events = {
 # --------------------
 
 # user_data_fields = [
-# 	{
-# 		"doctype": "{doctype_1}",
-# 		"filter_by": "{filter_by}",
-# 		"redact_fields": ["{field_1}", "{field_2}"],
-# 		"partial": 1,
-# 	},
-# 	{
-# 		"doctype": "{doctype_2}",
-# 		"filter_by": "{filter_by}",
-# 		"partial": 1,
-# 	},
-# 	{
-# 		"doctype": "{doctype_3}",
-# 		"strict": False,
-# 	},
-# 	{
-# 		"doctype": "{doctype_4}"
-# 	}
+#   {
+#       "doctype": "{doctype_1}",
+#       "filter_by": "{filter_by}",
+#       "redact_fields": ["{field_1}", "{field_2}"],
+#       "partial": 1,
+#   },
+#   {
+#       "doctype": "{doctype_2}",
+#       "filter_by": "{filter_by}",
+#       "partial": 1,
+#   },
+#   {
+#       "doctype": "{doctype_3}",
+#       "strict": False,
+#   },
+#   {
+#       "doctype": "{doctype_4}"
+#   }
 # ]
 
 # Authentication and authorization
 # --------------------------------
 
 # auth_hooks = [
-# 	"petroka_custom.auth.validate"
+#   "petroka_custom.auth.validate"
 # ]
 
 # Automatically update python controller files with type annotations for this app.
 # export_python_type_annotations = True
 
 # default_log_clearing_doctypes = {
-# 	"Logging DocType Name": 30  # days to retain logs
+#   "Logging DocType Name": 30  # days to retain logs
 # }
 
 fixtures = [
@@ -263,5 +263,11 @@ fixtures = [
         "filters": [
             ["Custom Field", "module", "=", "petroka_custom"]
         ]
+    },
+    {
+        "doctype": "Client Script",
+        "filters": [
+            ["Client Script", "name", "=", "Zkteco Log List"]
+        ]
     }
-]
+] 

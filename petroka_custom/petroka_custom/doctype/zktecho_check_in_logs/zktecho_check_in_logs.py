@@ -4,6 +4,7 @@ import requests
 from time import sleep
 from frappe.model.document import Document
 from frappe.utils.background_jobs import enqueue
+from frappe.utils import now_datetime, add_to_date
 
 
 class ZKtechoCheckInLogs(Document):
@@ -15,10 +16,12 @@ def enqueue_fetch_and_process_data():
     """
     Enqueue the data fetching task as a background job.
     """
+
     enqueue(
         "petroka_custom.petroka_custom.doctype.zktecho_check_in_logs.zktecho_check_in_logs.fetch_and_process_data",
         queue="long",
-        timeout=3600
+        timeout=3600,
+        now=False
     )
 
     frappe.msgprint("✅ Background job has been enqueued.")
@@ -27,128 +30,320 @@ def enqueue_fetch_and_process_data():
 def fetch_and_process_data():
     """
     Fetch transactions from Petroka BioTime API and insert into
-    ZKtecho Check-In Logs DocType with Employee mapping.
+    ZKtecho Check-In Logs DocType.
+
+    New Logic:
+    - Each Employee will be synced separately by attendance_device_id.
+    - For each Employee, start_time = that Employee's latest saved punch time - 10 minutes.
+    - If Employee has no saved logs, start_time = INITIAL_START_TIME.
     """
 
     base_url = "http://petroka.fortiddns.com:8081/iclock/api/transactions/"
-    page = 1
 
-    # Optional filters
-    start_time = "2026-01-01 00:00:00"
-    # end_time = "2026-05-14 23:59:59"
-    # emp_code = "100"
+    # First-time sync start date.
+    # Agar old 2024 data bhi chahiye to isko "2024-01-01 00:00:00" kar do.
+    INITIAL_START_TIME = "2026-01-01 00:00:00"
+
+    end_time = now_datetime().strftime("%Y-%m-%d %H:%M:%S")
 
     headers = {
         "Content-Type": "application/json",
         "Accept": "application/json",
 
-        # IMPORTANT:
-        # Yahan apna fresh Bearer token lagao.
-        # Uploaded token ko rotate/change karna better hai.
+        # Yahan fresh Bearer token lagao.
         "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc5NDI0MDUyLCJpYXQiOjE3NzkzMzc2NTIsImp0aSI6ImEzYjc1YzAzYzE2OTRlZmJiZmVlOGIyN2JlNzZmYzAxIiwidXNlcl9pZCI6MX0.yCrM_OU05ea8YkgY3W48CHQXSnDT6oT619XquMUad0U"
     }
 
-    try:
-        while True:
-            params = {
-                "page": page,
+    employees = frappe.get_all(
+        "Employee",
+        filters=[
+            ["attendance_device_id", "is", "set"],
+            ["attendance_device_id", "!=", ""],
+        ],
+        fields=["name", "employee_name", "attendance_device_id"],
+        order_by="name asc"
+    )
 
-                # Optional filters enable karne ho to uncomment karo
-                "start_time": start_time,
-                # "end_time": end_time,
-                # "emp_code": emp_code,
-            }
+    if not employees:
+        frappe.log_error(
+            "No Employee found with attendance_device_id.",
+            "Petroka ZKTeco No Employees To Sync"
+        )
+        print("⚠️ No Employee found with attendance_device_id.")
+        return
 
-            response = requests.get(
-                base_url,
+    total_inserted = 0
+    total_skipped = 0
+    total_failed = 0
+
+    frappe.log_error(
+        f"""
+        ZKTeco Employee Wise Sync Started
+
+        Employees:
+        {len(employees)}
+
+        End Time:
+        {end_time}
+        """,
+        "Petroka ZKTeco Sync Started"
+    )
+
+    for emp in employees:
+        employee = emp.name
+        employee_name = emp.employee_name
+        device_id = str(emp.attendance_device_id or "").strip()
+
+        if not device_id:
+            continue
+
+        try:
+            result = sync_single_employee(
+                base_url=base_url,
                 headers=headers,
-                params=params,
-                timeout=60,
-                verify=False
+                employee=employee,
+                employee_name=employee_name,
+                device_id=device_id,
+                initial_start_time=INITIAL_START_TIME,
+                end_time=end_time
             )
 
-            if response.status_code != 200:
-                frappe.log_error(
-                    f"""
-                    Failed to fetch page {page}
+            total_inserted += result.get("inserted", 0)
+            total_skipped += result.get("skipped", 0)
 
-                    Status Code:
-                    {response.status_code}
+        except Exception:
+            total_failed += 1
+            frappe.db.rollback()
+            frappe.log_error(
+                frappe.get_traceback(),
+                f"Petroka ZKTeco Employee Sync Failed - {employee}"
+            )
 
-                    URL:
-                    {response.url}
+    frappe.log_error(
+        f"""
+        ZKTeco Employee Wise Sync Finished
 
-                    Response:
-                    {response.text[:3000]}
-                    """,
-                    "Petroka ZKTeco API Error"
-                )
+        Employees:
+        {len(employees)}
 
-                print(f"❌ Failed page {page}: {response.status_code}")
-                print(response.text)
-                break
+        Total Inserted:
+        {total_inserted}
 
-            try:
-                data = response.json()
-            except Exception:
-                frappe.log_error(
-                    f"""
-                    API returned 200 but response is not valid JSON.
+        Total Skipped:
+        {total_skipped}
 
-                    Page:
-                    {page}
+        Total Failed Employees:
+        {total_failed}
 
-                    URL:
-                    {response.url}
+        End Time:
+        {end_time}
+        """,
+        "Petroka ZKTeco Sync Finished"
+    )
 
-                    Content-Type:
-                    {response.headers.get("Content-Type")}
 
-                    Response:
-                    {response.text[:3000]}
-                    """,
-                    "Petroka ZKTeco Invalid JSON Response"
-                )
+def sync_single_employee(
+    base_url,
+    headers,
+    employee,
+    employee_name,
+    device_id,
+    initial_start_time,
+    end_time
+):
+    """
+    Sync one employee based on that employee's own latest punch time.
+    """
 
-                print("❌ Invalid JSON response. Check Error Log.")
-                break
+    last_time = frappe.db.sql(
+        """
+        SELECT MAX(`time`)
+        FROM `tabZKtecho Check-In Logs`
+        WHERE employee = %s
+        """,
+        (employee,)
+    )[0][0]
 
-            records = data.get("data", [])
+    if last_time:
+        start_time = add_to_date(
+            last_time,
+            minutes=-10
+        ).strftime("%Y-%m-%d %H:%M:%S")
+    else:
+        start_time = initial_start_time
 
-            if not records:
-                print("✅ No records found. Finished.")
-                break
+    page = 1
+    inserted_count = 0
+    skipped_count = 0
 
-            print(f"📦 Page {page} - {len(records)} records found")
+    frappe.log_error(
+        f"""
+        Employee Sync Started
 
-            for record in records:
-                process_record(record)
+        Employee:
+        {employee}
 
-            frappe.db.commit()
+        Employee Name:
+        {employee_name}
 
-            if not data.get("next"):
-                print("✅ No next page. Finished.")
-                break
+        Device ID:
+        {device_id}
 
-            page += 1
-            sleep(1)
+        Start Time:
+        {start_time}
 
-    except Exception:
-        frappe.db.rollback()
-        frappe.log_error(
-            frappe.get_traceback(),
-            "Petroka ZKTeco API Fatal Error"
+        End Time:
+        {end_time}
+        """,
+        "Petroka ZKTeco Employee Sync Started"
+    )
+
+    while True:
+        params = {
+            "page": page,
+            "page_size": 1000,
+            "start_time": start_time,
+            "end_time": end_time,
+
+            # Important: API ko employee wise filter karne ke liye.
+            "emp_code": device_id,
+        }
+
+        response = requests.get(
+            base_url,
+            headers=headers,
+            params=params,
+            timeout=60,
+            verify=False
         )
-        print("❌ Fatal error. Check Error Log in ERPNext.")
+
+        if response.status_code != 200:
+            frappe.log_error(
+                f"""
+                Failed to fetch employee transactions
+
+                Employee:
+                {employee}
+
+                Device ID:
+                {device_id}
+
+                Page:
+                {page}
+
+                Status Code:
+                {response.status_code}
+
+                URL:
+                {response.url}
+
+                Response:
+                {response.text[:3000]}
+                """,
+                "Petroka ZKTeco API Error"
+            )
+
+            print(f"❌ Failed: {employee} | Device ID: {device_id} | Page: {page}")
+            break
+
+        try:
+            data = response.json()
+        except Exception:
+            frappe.log_error(
+                f"""
+                API returned invalid JSON
+
+                Employee:
+                {employee}
+
+                Device ID:
+                {device_id}
+
+                Page:
+                {page}
+
+                URL:
+                {response.url}
+
+                Response:
+                {response.text[:3000]}
+                """,
+                "Petroka ZKTeco Invalid JSON Response"
+            )
+            break
+
+        records = data.get("data", [])
+
+        if not records:
+            print(f"✅ No records found for {employee} | Device ID: {device_id}")
+            break
+
+        print(
+            f"📦 Employee={employee} | Device ID={device_id} | "
+            f"Page={page} | Records={len(records)}"
+        )
+
+        for record in records:
+            result = process_record(
+                record=record,
+                forced_employee=employee,
+                expected_emp_code=device_id
+            )
+
+            if result == "inserted":
+                inserted_count += 1
+            else:
+                skipped_count += 1
+
+        frappe.db.commit()
+
+        if not data.get("next"):
+            break
+
+        page += 1
+        sleep(1)
+
+    frappe.log_error(
+        f"""
+        Employee Sync Finished
+
+        Employee:
+        {employee}
+
+        Employee Name:
+        {employee_name}
+
+        Device ID:
+        {device_id}
+
+        Start Time:
+        {start_time}
+
+        End Time:
+        {end_time}
+
+        Inserted:
+        {inserted_count}
+
+        Skipped:
+        {skipped_count}
+        """,
+        "Petroka ZKTeco Employee Sync Finished"
+    )
+
+    return {
+        "inserted": inserted_count,
+        "skipped": skipped_count
+    }
 
 
-def process_record(record):
+def process_record(record, forced_employee=None, expected_emp_code=None):
     """
     Insert single BioTime punch transaction into ZKtecho Check-In Logs.
 
-    Employee mapping:
-        ZKTeco emp_code = Employee.attendance_device_id
-        Insert employee = Employee.name
+    If forced_employee is passed, use that employee directly.
+    Otherwise map using:
+    ZKTeco emp_code = Employee.attendance_device_id
     """
 
     emp_code = str(record.get("emp_code") or "").strip()
@@ -171,16 +366,36 @@ def process_record(record):
             "Petroka ZKTeco Invalid Record"
         )
         print(f"⚠️ Skipped invalid record: {record}")
-        return
+        return "skipped"
 
-    # Employee mapping by attendance_device_id
-    employee = frappe.db.get_value(
-        "Employee",
-        {
-            "attendance_device_id": emp_code
-        },
-        "name"
-    )
+    if expected_emp_code and emp_code != str(expected_emp_code).strip():
+        frappe.log_error(
+            f"""
+            Skipped record because emp_code mismatch.
+
+            Expected Device ID:
+            {expected_emp_code}
+
+            Record emp_code:
+            {emp_code}
+
+            Record:
+            {record}
+            """,
+            "Petroka ZKTeco Emp Code Mismatch"
+        )
+        return "skipped"
+
+    if forced_employee:
+        employee = forced_employee
+    else:
+        employee = frappe.db.get_value(
+            "Employee",
+            {
+                "attendance_device_id": emp_code
+            },
+            "name"
+        )
 
     if not employee:
         frappe.log_error(
@@ -203,14 +418,13 @@ def process_record(record):
         )
 
         print(f"⚠️ Employee not found for attendance_device_id: {emp_code}")
-        return
+        return "skipped"
 
     log_type = get_log_type(
         punch_state=punch_state,
         punch_state_display=punch_state_display
     )
 
-    # Duplicate check should use mapped Employee name, not emp_code
     exists = frappe.db.exists(
         "ZKtecho Check-In Logs",
         {
@@ -221,21 +435,17 @@ def process_record(record):
 
     if exists:
         print(f"⏭️ Duplicate skipped: {employee} | {emp_code} | {punch_time}")
-        return
+        return "skipped"
 
     doc_data = {
         "doctype": "ZKtecho Check-In Logs",
-
-        # Employee Link field should get actual Employee.name
         "employee": employee,
-
         "time": punch_time,
         "log_type": log_type,
     }
 
     meta = frappe.get_meta("ZKtecho Check-In Logs")
 
-    # Add optional fields only if they exist in your custom DocType
     optional_fields = {
         "emp_code": emp_code,
         "attendance_device_id": emp_code,
@@ -266,19 +476,21 @@ def process_record(record):
         f"{first_name} | {department} | {punch_time} | {log_type}"
     )
 
+    return "inserted"
+
 
 def get_log_type(punch_state, punch_state_display=None):
     """
     IN / OUT logic.
 
     Best source:
-        punch_state_display:
-            Check In  => IN
-            Check Out => OUT
+    punch_state_display:
+    Check In  => IN
+    Check Out => OUT
 
     Fallback:
-        punch_state 0 => IN
-        punch_state 1 => OUT
+    punch_state 0 => IN
+    punch_state 1 => OUT
     """
 
     punch_state = str(punch_state or "").strip()
@@ -298,13 +510,9 @@ def get_log_type(punch_state, punch_state_display=None):
     if punch_state == "1":
         return "OUT"
 
-    # 255 ka meaning device configuration par depend karta hai.
-    # Agar aapke server me 255 Check In hota hai to IN rakha hai.
     if punch_state == "255":
         return "IN"
 
-    # Unknown state ko default IN mat karna better hai,
-    # lekin existing flow break na ho isliye log karke IN return kar rahe hain.
     frappe.log_error(
         f"Unknown punch_state: {punch_state}, display: {punch_state_display}",
         "Petroka ZKTeco Unknown Punch State"

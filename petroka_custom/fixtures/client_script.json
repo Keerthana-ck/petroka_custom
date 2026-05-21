@@ -1,0 +1,13 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "ZKtecho Check-In Logs",
+  "enabled": 1,
+  "modified": "2026-05-21 18:38:27.570702",
+  "module": "petroka_custom",
+  "name": "Zkteco Log List",
+  "script": "frappe.listview_settings[\"ZKtecho Check-In Logs\"] = {\n\tonload: function (listview) {\n\t\tlistview.page.add_inner_button(__(\"Sync ZKTeco Logs\"), function () {\n\t\t\tfrappe.confirm(\n\t\t\t\t__(\"Do you want to sync ZKTeco logs now?\"),\n\t\t\t\tfunction () {\n\t\t\t\t\tfrappe.call({\n\t\t\t\t\t\tmethod: \"petroka_custom.petroka_custom.custom_script.zkteco.enqueue_sync_zkteco_logs\",\n\t\t\t\t\t\tfreeze: true,\n\t\t\t\t\t\tfreeze_message: __(\"Scheduling ZKTeco sync...\"),\n\t\t\t\t\t\tcallback: function (r) {\n\t\t\t\t\t\t\tif (!r.exc) {\n\t\t\t\t\t\t\t\tfrappe.show_alert({\n\t\t\t\t\t\t\t\t\tmessage: __(\"ZKTeco sync has been scheduled successfully.\"),\n\t\t\t\t\t\t\t\t\tindicator: \"green\"\n\t\t\t\t\t\t\t\t}, 5);\n\n\t\t\t\t\t\t\t\tlistview.refresh();\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t},\n\t\t\t\t\t\terror: function () {\n\t\t\t\t\t\t\tfrappe.msgprint({\n\t\t\t\t\t\t\t\ttitle: __(\"Error\"),\n\t\t\t\t\t\t\t\tmessage: __(\"ZKTeco sync could not be scheduled. Please check Error Log.\"),\n\t\t\t\t\t\t\t\tindicator: \"red\"\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t);\n\t\t});\n\t}\n};",
+  "view": "List"
+ }
+]
