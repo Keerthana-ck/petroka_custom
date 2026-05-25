@@ -7,6 +7,8 @@ from frappe.utils.background_jobs import enqueue
 from frappe.utils import now_datetime, add_to_date
 
 
+
+# ===================latest
 class ZKtechoCheckInLogs(Document):
     pass
 
@@ -51,7 +53,7 @@ def fetch_and_process_data():
         "Accept": "application/json",
 
         # Yahan fresh Bearer token lagao.
-        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc5NDI0MDUyLCJpYXQiOjE3NzkzMzc2NTIsImp0aSI6ImEzYjc1YzAzYzE2OTRlZmJiZmVlOGIyN2JlNzZmYzAxIiwidXNlcl9pZCI6MX0.yCrM_OU05ea8YkgY3W48CHQXSnDT6oT619XquMUad0U"
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc5NzcyMjc5LCJpYXQiOjE3Nzk2ODU4NzksImp0aSI6Ijg3NTc1OWI2NzRmZDQyMzBiOTE4NTZlOWVmZjJjMThjIiwidXNlcl9pZCI6MX0.kTWCUGtQMj6M8rXFQGypjKr7py2swNpUA5tLivzoZ94"
     }
 
     employees = frappe.get_all(
