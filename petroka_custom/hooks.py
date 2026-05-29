@@ -5,6 +5,7 @@ app_description = "Custom App for Petroka"
 app_email = "admin@gmail.com"
 app_license = "mit"
 
+# Leave Application balance validation is customized via override_doctype_class below.
 # Apps
 # ------------------
 
@@ -129,20 +130,26 @@ app_license = "mit"
 # ---------------
 # Override standard doctype classes
 
-# override_doctype_class = {
-#   "ToDo": "custom_app.overrides.CustomToDo"
-# }
+# Override standard Leave Application validation for future earned leave booking.
+override_doctype_class = {
+    "Leave Application": "petroka_custom.overrides.leave_application.CustomLeaveApplication"
+}
 
 # Document Events
 # ---------------
 # Hook on document methods and events
-
 doc_events = {
     "Task": {
         "validate": "petroka_custom.doc_event.create_leave_allocation"
     },
+    # "Leave Application": {
+    #     "validate": "petroka_custom.doc_event.validate_bereavement_leave"
+    # },
     "Leave Application": {
-        "validate": "petroka_custom.doc_event.validate_bereavement_leave"
+        "validate": [
+            "petroka_custom.doc_event.validate_bereavement_leave",
+            "petroka_custom.petroka_custom.custom_script.leave_application.validate_future_draft_leave"
+        ]
     }
    
 }
