@@ -53,7 +53,7 @@ def fetch_and_process_data():
         "Accept": "application/json",
 
         # Yahan fresh Bearer token lagao.
-        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzgwNjQ2MjY1LCJpYXQiOjE3ODA1NTk4NjUsImp0aSI6ImQzODFjMzkwYmVlNzRiZjQ5MzQ4ZjNlMmFmMmM3Y2NiIiwidXNlcl9pZCI6MX0.dex_DhWF33f0hYu2vU5VptGNAmA6BzY44ejyOoFafvs"
+        "Authorization": "Token 3015bbb5f6fe8e0d2aae624d54b68069087b531e"
     }
 
     employees = frappe.get_all(
