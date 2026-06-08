@@ -13,6 +13,8 @@ from hrms.hr.doctype.leave_application.leave_application import (
 )
 
 
+
+
 class CustomLeaveApplication(LeaveApplication):
 	def validate_balance_leaves(self):
 		precision = cint(frappe.db.get_single_value("System Settings", "float_precision")) or 2
