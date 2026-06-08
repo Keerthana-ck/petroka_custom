@@ -26,7 +26,7 @@ app_license = "mit"
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/petroka_custom/css/petroka_custom.css"
+app_include_css = "/assets/petroka_custom/css/petroka_custom.css"
 # app_include_js = "/assets/petroka_custom/js/petroka_custom.js"
 
 # include js, css files in header of web template
