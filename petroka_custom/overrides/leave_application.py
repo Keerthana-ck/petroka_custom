@@ -1,3 +1,5 @@
+import calendar
+
 import frappe
 from frappe import _
 from frappe.utils import cint, flt, getdate, today
@@ -77,13 +79,19 @@ class CustomLeaveApplication(LeaveApplication):
 		)
 
 	def get_future_earned_leave(self):
-		if not self.get_annual_allocation():
+		allocation = self.get_leave_allocation()
+		if not allocation:
 			return 0
 
-		months = self.get_months_until_leave()
-		return 2 * months
+		monthly_accrual = flt(allocation.total_leaves_allocated) / 12
+		months = self.get_future_accrual_months(allocation)
+		return monthly_accrual * months
 
 	def get_annual_allocation(self):
+		allocation = self.get_leave_allocation()
+		return flt(allocation.total_leaves_allocated) if allocation else 0
+
+	def get_leave_allocation(self):
 		allocation = frappe.db.get_value(
 			"Leave Allocation",
 			{
@@ -93,21 +101,72 @@ class CustomLeaveApplication(LeaveApplication):
 				"from_date": ["<=", self.from_date],
 				"to_date": [">=", self.get_application_date()],
 			},
-			["total_leaves_allocated"],
+			["name", "from_date", "to_date", "total_leaves_allocated"],
 			order_by="from_date desc",
 			as_dict=True,
 		)
 
-		return flt(allocation.total_leaves_allocated) if allocation else 0
+		return allocation
 
-	def get_months_until_leave(self):
+	def get_future_accrual_months(self, allocation):
 		application_date = getdate(self.get_application_date())
 		leave_end_date = getdate(self.to_date)
-		months = (leave_end_date.year - application_date.year) * 12 + (
-			leave_end_date.month - application_date.month
+		allocation_from_date = getdate(allocation.from_date)
+		allocation_to_date = getdate(allocation.to_date)
+		date_of_joining = self.get_employee_date_of_joining()
+		if not date_of_joining:
+			return 0
+
+		date_of_joining = getdate(date_of_joining)
+		accrual_start_date = max(
+			self.get_month_start(application_date),
+			allocation_from_date,
+			date_of_joining,
+		)
+		accrual_end_date = min(leave_end_date, allocation_to_date)
+
+		if accrual_end_date < accrual_start_date:
+			return 0
+
+		return self.get_monthly_doj_accrual_count(
+			accrual_start_date,
+			accrual_end_date,
+			date_of_joining,
 		)
 
-		return max(months, 0)
+	def get_monthly_doj_accrual_count(self, accrual_start_date, accrual_end_date, date_of_joining):
+		months = 0
+		year = accrual_start_date.year
+		month = accrual_start_date.month
+		accrual_day = date_of_joining.day
+
+		while (year, month) <= (accrual_end_date.year, accrual_end_date.month):
+			accrual_date = self.get_monthly_accrual_date(year, month, accrual_day)
+
+			if (
+				accrual_date >= accrual_start_date
+				and accrual_date <= accrual_end_date
+				and accrual_date >= date_of_joining
+			):
+				months += 1
+
+			month += 1
+			if month > 12:
+				month = 1
+				year += 1
+
+		return months
+
+	def get_monthly_accrual_date(self, year, month, accrual_day):
+		last_day = calendar.monthrange(year, month)[1]
+		return getdate(f"{year}-{month:02d}-{min(accrual_day, last_day):02d}")
+
+	def get_month_start(self, date):
+		date = getdate(date)
+		return getdate(f"{date.year}-{date.month:02d}-01")
+
+	def get_employee_date_of_joining(self):
+		return frappe.db.get_value("Employee", self.employee, "date_of_joining")
 
 	def get_application_date(self):
 		return self.posting_date or today()
