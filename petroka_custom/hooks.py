@@ -140,7 +140,8 @@ override_doctype_class = {
 # Hook on document methods and events
 doc_events = {
     "Task": {
-        "validate": "petroka_custom.doc_event.create_leave_allocation"
+        "validate": "petroka_custom.doc_event.create_leave_allocation",
+        "after_insert": "petroka_custom.overrides.task.assign_task_to_creator"
     },
     # "Leave Application": {
     #     "validate": "petroka_custom.doc_event.validate_bereavement_leave"
