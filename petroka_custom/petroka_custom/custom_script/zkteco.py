@@ -128,8 +128,8 @@ def create_employee_checkin(employee, time, log_type, shift_type):
     """
 
     # Yahan apni actual ZKTeco machine / branch location ki latitude longitude daalo
-    DEFAULT_LATITUDE = 25.2048
-    DEFAULT_LONGITUDE = 55.2708
+    DEFAULT_LATITUDE = 13.043
+    DEFAULT_LONGITUDE = 80.274
 
     try:
         exists = frappe.db.exists(
@@ -176,3 +176,81 @@ def create_employee_checkin(employee, time, log_type, shift_type):
             title="Employee Check-In Creation Error"
         )
         frappe.throw(f"Failed to create Employee Check-In: {str(e)}")
+
+# def create_employee_checkin(employee, time, log_type, shift_type):
+#     """
+#     Create Employee Check-In entry if it doesn't already exist.
+#     """
+
+#     try:
+#         exists = frappe.db.exists(
+#             "Employee Checkin",
+#             {
+#                 "employee": employee,
+#                 "time": time
+#             }
+#         )
+
+#         if exists:
+#             return
+
+#         latitude = None
+#         longitude = None
+
+#         # Get coordinates from Shift Location
+#         try:
+#             if shift_type and frappe.db.exists("Shift Type", shift_type):
+
+#                 shift_doc = frappe.get_doc("Shift Type", shift_type)
+
+#                 shift_location = shift_doc.get("shift_location")
+
+#                 if shift_location and frappe.db.exists("Shift Location", shift_location):
+
+#                     location_doc = frappe.get_doc(
+#                         "Shift Location",
+#                         shift_location
+#                     )
+
+#                     latitude = location_doc.get("latitude")
+#                     longitude = location_doc.get("longitude")
+
+#         except Exception:
+#             frappe.log_error(
+#                 frappe.get_traceback(),
+#                 f"Unable to fetch Shift Location - {employee}"
+#             )
+
+#         doc_data = {
+#             "doctype": "Employee Checkin",
+#             "employee": employee,
+#             "time": time,
+#             "log_type": log_type,
+#             "latitude": latitude,
+#             "longitude": longitude,
+#         }
+
+#         if shift_type and frappe.db.exists("Shift Type", shift_type):
+#             doc_data["shift"] = shift_type
+
+#         doc = frappe.get_doc(doc_data)
+#         doc.insert(ignore_permissions=True)
+
+#         frappe.db.commit()
+
+#         frappe.logger().info(
+#             f"Employee Checkin Created: {employee} | {time} | {log_type}"
+#         )
+
+#     except Exception:
+#         frappe.log_error(
+#             message=f"""
+#         Employee: {employee}
+#         Shift: {shift_type}
+#         Time: {time}
+#         Log Type: {log_type}
+
+#         {frappe.get_traceback()}
+#         """,
+#                     title="Employee Check-In Creation Error"
+#                 )
