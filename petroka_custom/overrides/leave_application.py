@@ -1,4 +1,5 @@
 import calendar
+import math
 
 import frappe
 from frappe import _
@@ -16,6 +17,8 @@ from hrms.hr.doctype.leave_application.leave_application import (
 
 
 class CustomLeaveApplication(LeaveApplication):
+	def round_down_half(self, value):
+		return math.floor(flt(value) * 2) / 2
 	def validate_balance_leaves(self):
 		precision = cint(frappe.db.get_single_value("System Settings", "float_precision")) or 2
 
@@ -47,9 +50,15 @@ class CustomLeaveApplication(LeaveApplication):
 			return
 
 		current_balance = flt(self.get_current_leave_balance(), precision)
-		future_earned_leave = flt(self.get_future_earned_leave(), precision)
-		total_eligible_leave = flt(current_balance + future_earned_leave, precision)
+		# future_earned_leave = flt(self.get_future_earned_leave(), precision)
+		# total_eligible_leave = flt(current_balance + future_earned_leave, precision)
+		future_earned_leave = self.round_down_half(
+			flt(self.get_future_earned_leave(), precision)
+		)
 
+		total_eligible_leave = self.round_down_half(
+			flt(current_balance + future_earned_leave, precision)
+		)
 		self.set_future_leave_fields(future_earned_leave, total_eligible_leave)
 
 		if self.status != "Rejected" and flt(self.total_leave_days, precision) > total_eligible_leave:
