@@ -99,16 +99,16 @@ def create_leave_allocation(doc, method=None):
 		)
 
 		# Insert child row directly
-		frappe.get_doc({
-			"doctype": "Task List",
-			"parent": leave_allocation.name,
-			"parenttype": "Leave Allocation",
-			"parentfield": "tasks",
+		leave_allocation.append("tasks", {
 			"task": doc.name,
 			"from_date": from_date,
 			"to_date": to_date,
 			"expired": 0
-		}).insert(ignore_permissions=True)
+		})
+		for i, row in enumerate(leave_allocation.tasks, start=1):
+			row.idx = i
+
+		leave_allocation.save(ignore_permissions=True)
 
 	else:
 
@@ -236,6 +236,7 @@ def expire_leave_allocation():
 				ledger.is_carry_forward = 0
 
 				ledger.insert(ignore_permissions=True)
+				ledger.submit()
 
 			# Mark task expired
 			frappe.db.set_value(
