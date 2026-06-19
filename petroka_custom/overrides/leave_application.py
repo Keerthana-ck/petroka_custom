@@ -89,14 +89,28 @@ class CustomLeaveApplication(LeaveApplication):
 			consider_all_leaves_in_the_allocation_period=True,
 		)
 
+	# def get_future_earned_leave(self):
+	# 	allocation = self.get_leave_allocation()
+	# 	if not allocation:
+	# 		return 0
+
+	# 	monthly_accrual = flt(allocation.total_leaves_allocated) / 12
+	# 	months = self.get_future_accrual_months(allocation)
+	# 	return monthly_accrual * months
 	def get_future_earned_leave(self):
 		allocation = self.get_leave_allocation()
 		if not allocation:
 			return 0
 
-		monthly_accrual = flt(allocation.total_leaves_allocated) / 12
+		# Existing allocation based calculation disabled
+		# monthly_accrual = flt(allocation.total_leaves_allocated) / 12
+		# months = self.get_future_accrual_months(allocation)
+		# return monthly_accrual * months
+
 		months = self.get_future_accrual_months(allocation)
-		return monthly_accrual * months
+
+		# Fixed 2.5 leave per accrued month
+		return months * 2.5
 
 	def get_annual_allocation(self):
 		allocation = self.get_leave_allocation()
