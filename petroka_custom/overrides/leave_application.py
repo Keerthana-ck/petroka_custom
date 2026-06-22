@@ -20,6 +20,11 @@ class CustomLeaveApplication(LeaveApplication):
 	def round_down_half(self, value):
 		return math.floor(flt(value) * 2) / 2
 	def validate_balance_leaves(self):
+		if not frappe.db.get_single_value(
+			"HR Settings",
+			"custom_enable_future_leave"
+		):
+			return super().validate_balance_leaves()
 		precision = cint(frappe.db.get_single_value("System Settings", "float_precision")) or 2
 
 		if not (self.employee and self.leave_type and self.from_date and self.to_date):
@@ -159,14 +164,55 @@ class CustomLeaveApplication(LeaveApplication):
 			date_of_joining,
 		)
 
-	def get_monthly_doj_accrual_count(self, accrual_start_date, accrual_end_date, date_of_joining):
+	# def get_monthly_doj_accrual_count(self, accrual_start_date, accrual_end_date, date_of_joining):
+	# 	months = 0
+	# 	year = accrual_start_date.year
+	# 	month = accrual_start_date.month
+	# 	accrual_day = date_of_joining.day
+
+	# 	while (year, month) <= (accrual_end_date.year, accrual_end_date.month):
+	# 		accrual_date = self.get_monthly_accrual_date(year, month, accrual_day)
+
+	# 		if (
+	# 			accrual_date >= accrual_start_date
+	# 			and accrual_date <= accrual_end_date
+	# 			and accrual_date >= date_of_joining
+	# 		):
+	# 			months += 1
+
+	# 		month += 1
+	# 		if month > 12:
+	# 			month = 1
+	# 			year += 1
+
+	# 	return months
+	def get_monthly_doj_accrual_count(
+		self,
+		accrual_start_date,
+		accrual_end_date,
+		date_of_joining,
+	):
 		months = 0
 		year = accrual_start_date.year
 		month = accrual_start_date.month
 		accrual_day = date_of_joining.day
 
+		application_date = getdate(self.get_application_date())
+
 		while (year, month) <= (accrual_end_date.year, accrual_end_date.month):
-			accrual_date = self.get_monthly_accrual_date(year, month, accrual_day)
+			accrual_date = self.get_monthly_accrual_date(
+				year,
+				month,
+				accrual_day,
+			)
+
+			# Skip accruals already earned and reflected in current balance
+			if accrual_date <= application_date:
+				month += 1
+				if month > 12:
+					month = 1
+					year += 1
+				continue
 
 			if (
 				accrual_date >= accrual_start_date
