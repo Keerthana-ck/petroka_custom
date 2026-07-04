@@ -158,6 +158,8 @@ doc_events = {
 # Scheduled Tasks
 # ---------------
 
+
+
 scheduler_events = {
 #   "all": [
 #       "petroka_custom.tasks.all"
