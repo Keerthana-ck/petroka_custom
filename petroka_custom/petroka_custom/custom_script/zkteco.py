@@ -254,3 +254,265 @@ def create_employee_checkin(employee, time, log_type, shift_type):
 #         """,
 #                     title="Employee Check-In Creation Error"
 #                 )
+
+
+# from frappe.utils import today, add_days
+
+# from frappe.utils import today, now_datetime
+
+# @frappe.whitelist()
+# def sync_morning_checkins():
+#     logger = frappe.logger("morning_checkins")
+
+#     current = now_datetime()
+
+#     # Run only between 08:30 AM and 11:00 AM
+#     if not (
+#         (current.hour == 8 and current.minute >= 30)
+#         or (current.hour == 9)
+#         or (current.hour == 10)
+#         or (current.hour == 11 and current.minute == 0)
+#     ):
+#         logger.info(f"Skipped execution at {current}")
+#         return
+
+#     logger.info("sync_morning_checkins started")
+
+#     process_date = today()
+#     logger.info(f"Process date: {process_date}")
+
+#     employees = frappe.db.sql("""
+#         SELECT DISTINCT employee
+#         FROM `tabZKtecho Check-In Logs`
+#         WHERE DATE(time)=%s
+#     """, process_date, as_dict=True)
+
+#     logger.info(f"Total employees found: {len(employees)}")
+
+#     for row in employees:
+#         employee = row.employee
+#         logger.info(f"Processing employee: {employee}")
+
+#         in_exists = frappe.db.sql("""
+#             SELECT name
+#             FROM `tabEmployee Checkin`
+#             WHERE employee=%s
+#             AND log_type='IN'
+#             AND DATE(time)=%s
+#             LIMIT 1
+#         """, (employee, process_date))
+
+#         if in_exists:
+#             logger.info(f"IN already exists for {employee}, skipping")
+#             continue
+
+#         first_log = frappe.db.sql("""
+#             SELECT time
+#             FROM `tabZKtecho Check-In Logs`
+#             WHERE employee=%s
+#             AND DATE(time)=%s
+#             ORDER BY time ASC
+#             LIMIT 1
+#         """, (employee, process_date), as_dict=True)
+
+#         if not first_log:
+#             logger.info(f"No logs found for {employee}")
+#             continue
+
+#         logger.info(f"Creating IN check-in for {employee} at {first_log[0].time}")
+
+#         try:
+#             create_employee_checkin(
+#                 employee,
+#                 first_log[0].time,
+#                 "IN",
+#                 None
+#             )
+#             logger.info(f"Successfully created IN check-in for {employee}")
+
+#         except Exception:
+#             frappe.log_error(
+#                 title=f"Morning Check-in Sync Failed - {employee}",
+#                 message=frappe.get_traceback()
+#             )
+#             logger.error(f"Failed to create check-in for {employee}")
+
+#     frappe.db.commit()
+#     logger.info("sync_morning_checkins completed successfully")
+
+from frappe.utils import today, add_days
+
+from frappe.utils import today, now_datetime
+from datetime import time
+
+@frappe.whitelist()
+def sync_morning_checkins():
+    logger = frappe.logger("morning_checkins")
+
+    current = now_datetime()
+
+    # Debug Logs
+    logger.info("=" * 60)
+    logger.info(f"Current Server Datetime : {current}")
+    logger.info(f"Current Time           : {current.time()}")
+    logger.info("=" * 60)
+
+    # Allow only between 08:30:00 and 11:00:00
+    start_time = time(9, 0, 0)
+    end_time = time(11, 30, 0)
+
+    if not (start_time <= current.time() <= end_time):
+        logger.info(f"Skipped execution. Current time {current.time()} is outside allowed range.")
+        return
+
+    logger.info("sync_morning_checkins started")
+
+    process_date = today()
+
+    employees = frappe.db.sql("""
+        SELECT DISTINCT employee
+        FROM `tabZKtecho Check-In Logs`
+        WHERE DATE(time)=%s
+    """, process_date, as_dict=True)
+
+    logger.info(f"Total employees found: {len(employees)}")
+
+    for row in employees:
+        employee = row.employee
+
+        logger.info(f"Processing Employee: {employee}")
+
+        # Check if IN already exists
+        in_exists = frappe.db.exists(
+            "Employee Checkin",
+            {
+                "employee": employee,
+                "log_type": "IN",
+                "time": ["between", [f"{process_date} 00:00:00", f"{process_date} 23:59:59"]]
+            }
+        )
+
+        if in_exists:
+            logger.info(f"IN already exists for {employee}")
+            continue
+
+        # Get first log of the day
+        first_log = frappe.db.sql("""
+            SELECT time
+            FROM `tabZKtecho Check-In Logs`
+            WHERE employee=%s
+            AND DATE(time)=%s
+            ORDER BY time ASC
+            LIMIT 1
+        """, (employee, process_date), as_dict=True)
+
+        if not first_log:
+            logger.info(f"No logs found for {employee}")
+            continue
+
+        logger.info(f"Creating IN for {employee} at {first_log[0].time}")
+
+        try:
+            create_employee_checkin(
+                employee=employee,
+                time=first_log[0].time,
+                log_type="IN",
+                shift_type=None
+            )
+
+            logger.info(f"Successfully created IN for {employee}")
+
+        except Exception:
+            logger.error(frappe.get_traceback())
+            frappe.log_error(
+                title=f"Morning Check-in Sync Failed - {employee}",
+                message=frappe.get_traceback()
+            )
+
+    frappe.db.commit()
+
+    logger.info("sync_morning_checkins completed successfully")
+
+
+
+
+# @frappe.whitelist()
+# def sync_night_checkouts():
+#     print("hhhhhhhhhhhhhhhhhhhhhhhhhhh")
+
+#     process_date = add_days(today(), -1)
+
+#     employees = frappe.db.sql("""
+#         SELECT DISTINCT employee
+#         FROM `tabZKtecho Check-In Logs`
+#         WHERE DATE(time)=%s
+#     """, process_date, as_dict=True)
+
+#     for row in employees:
+
+#         employee = row.employee
+
+#         logs = frappe.db.sql("""
+#             SELECT time
+#             FROM `tabZKtecho Check-In Logs`
+#             WHERE employee=%s
+#             AND DATE(time)=%s
+#             ORDER BY time ASC
+#         """, (employee, process_date), as_dict=True)
+
+#         if not logs:
+#             continue
+
+#         first_log = logs[0].time
+#         last_log = logs[-1].time
+
+#         in_exists = frappe.db.sql("""
+#             SELECT name
+#             FROM `tabEmployee Checkin`
+#             WHERE employee=%s
+#             AND log_type='IN'
+#             AND DATE(time)=%s
+#             LIMIT 1
+#         """, (employee, process_date))
+
+#         out_exists = frappe.db.sql("""
+#             SELECT name
+#             FROM `tabEmployee Checkin`
+#             WHERE employee=%s
+#             AND log_type='OUT'
+#             AND DATE(time)=%s
+#             LIMIT 1
+#         """, (employee, process_date))
+
+#         # Morning me IN ban gaya tha
+#         if in_exists:
+
+#             if not out_exists and first_log != last_log:
+
+#                 create_employee_checkin(
+#                     employee,
+#                     last_log,
+#                     "OUT",
+#                     None
+#                 )
+
+#         # Morning me IN nahi bana
+#         else:
+
+#             create_employee_checkin(
+#                 employee,
+#                 first_log,
+#                 "IN",
+#                 None
+#             )
+
+#             if first_log != last_log:
+
+#                 create_employee_checkin(
+#                     employee,
+#                     last_log,
+#                     "OUT",
+#                     None
+#                 )
+
+#     frappe.db.commit()
