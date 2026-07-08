@@ -167,35 +167,27 @@ scheduler_events = {
     "daily": [
         "petroka_custom.doc_event.expire_leave_allocation"
     ],
-    "daily": [
-        "petroka_custom.petroka_custom.custom_script.zkteco.enqueue_sync_zkteco_logs"
-    ],
+    # "daily": [
+    #     "petroka_custom.petroka_custom.custom_script.zkteco.enqueue_sync_zkteco_logs"
+    # ],
     "hourly": [
         "petroka_custom.petroka_custom.doctype.zktecho_check_in_logs.zktecho_check_in_logs.enqueue_fetch_and_process_data"
     ],
     
-    # "cron": {
-    #     "0 0 * * *": [
-    #         "petroka_custom.petroka_custom.custom_script.zkteco.enqueue_sync_zkteco_logs"
-    #     ]
-    # }
     "cron": {
-        "* * * * *": [
-            "petroka_custom.petroka_custom.custom_script.zkteco.sync_morning_checkins"
-        ],
+        "0 0 * * *": [
+            "petroka_custom.petroka_custom.custom_script.zkteco.enqueue_sync_zkteco_logs"
+        ]
+    }
+    # "cron": {
+    #     "* * * * *": [
+    #         "petroka_custom.petroka_custom.custom_script.zkteco.sync_morning_checkins"
+    #     ],
         # "0 0 * * *": [
         #     "petroka_custom.petroka_custom.custom_script.zkteco.sync_night_checkouts"
         # ]
-    }
-#   "hourly": [
-#       "petroka_custom.tasks.hourly"
-#   ],
-#   "weekly": [
-#       "petroka_custom.tasks.weekly"
-#   ],
-#   "monthly": [
-#       "petroka_custom.tasks.monthly"
-#   ],
+    # }
+
 }
 
 # Testing
