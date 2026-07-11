@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
-from frappe.utils import add_days, getdate, today, flt
+from frappe.utils import add_days, flt, getdate, today
 
 class WorkRequestForm(Document):
 
@@ -50,10 +50,15 @@ class WorkRequestForm(Document):
 
 	def remove_from_leave_allocation(self):
 		"""
-		Remove this Work Request from its Leave Allocation.
+		Remove only this Work Request row.
 
-		If no other Work Requests remain, cancel the Leave Allocation.
-		HRMS will automatically handle its Leave Ledger Entry.
+		If other Work Requests remain:
+		- Keep the Leave Allocation submitted
+		- Reduce allocated leave by one
+		- Recalculate allocation dates
+
+		If no Work Requests remain:
+		- Cancel the Leave Allocation
 		"""
 
 		allocation_names = frappe.get_all(
@@ -84,6 +89,9 @@ class WorkRequestForm(Document):
 			if not matching_rows:
 				continue
 
+			leave_allocation.flags.ignore_validate_update_after_submit = True
+			leave_allocation.flags.ignore_permissions = True
+
 			for row in matching_rows:
 				leave_allocation.remove(row)
 
@@ -93,42 +101,52 @@ class WorkRequestForm(Document):
 			)
 
 			if not remaining_rows:
-				# HRMS automatically manages the Leave Ledger Entry.
+				# Cancel only when all corresponding Work Requests
+				# have been removed/cancelled.
 				leave_allocation.flags.ignore_links = True
 				leave_allocation.cancel()
+				return
 
-			else:
-				leave_allocation.flags.ignore_validate_update_after_submit = True
+			# Reduce the leave allocation only for this Work Request.
+			leave_allocation.new_leaves_allocated = max(
+				flt(leave_allocation.new_leaves_allocated)
+				- len(matching_rows),
+				0,
+			)
 
-				leave_allocation.new_leaves_allocated = max(
-					flt(leave_allocation.new_leaves_allocated) - 1,
-					0,
+			# Keep Total Leaves Allocated synchronized.
+			leave_allocation.total_leaves_allocated = (
+				leave_allocation.new_leaves_allocated
+			)
+
+			# Recalculate the allocation period using remaining rows.
+			valid_from_dates = [
+				getdate(row.from_date)
+				for row in remaining_rows
+				if row.from_date
+			]
+
+			valid_to_dates = [
+				getdate(row.to_date)
+				for row in remaining_rows
+				if row.to_date
+			]
+
+			if valid_from_dates:
+				leave_allocation.from_date = min(
+					valid_from_dates
 				)
 
-				# Recalculate the allocation period using remaining rows.
-				valid_from_dates = [
-					getdate(row.from_date)
-					for row in remaining_rows
-					if row.from_date
-				]
-
-				valid_to_dates = [
-					getdate(row.to_date)
-					for row in remaining_rows
-					if row.to_date
-				]
-
-				if valid_from_dates:
-					leave_allocation.from_date = min(valid_from_dates)
-
-				if valid_to_dates:
-					leave_allocation.to_date = max(valid_to_dates)
-
-				leave_allocation.save(
-					ignore_permissions=True
+			if valid_to_dates:
+				leave_allocation.to_date = max(
+					valid_to_dates
 				)
 
-			break
+			leave_allocation.save(
+				ignore_permissions=True
+			)
+
+			return
 
 	def update_existing_leave_allocation(
 		self,
@@ -150,21 +168,28 @@ class WorkRequestForm(Document):
 				return
 
 		leave_allocation.flags.ignore_validate_update_after_submit = True
+		leave_allocation.flags.ignore_permissions = True
 
 		if (
 			not leave_allocation.to_date
-			or getdate(to_date) > getdate(leave_allocation.to_date)
+			or getdate(to_date)
+			> getdate(leave_allocation.to_date)
 		):
 			leave_allocation.to_date = to_date
 
 		if (
 			not leave_allocation.from_date
-			or getdate(from_date) < getdate(leave_allocation.from_date)
+			or getdate(from_date)
+			< getdate(leave_allocation.from_date)
 		):
 			leave_allocation.from_date = from_date
 
 		leave_allocation.new_leaves_allocated = (
 			flt(leave_allocation.new_leaves_allocated) + 1
+		)
+
+		leave_allocation.total_leaves_allocated = (
+			leave_allocation.new_leaves_allocated
 		)
 
 		leave_allocation.append(
@@ -196,6 +221,7 @@ class WorkRequestForm(Document):
 		leave_allocation.from_date = from_date
 		leave_allocation.to_date = to_date
 		leave_allocation.new_leaves_allocated = 1
+		leave_allocation.total_leaves_allocated = 1
 
 		leave_allocation.append(
 			"custom_work_order_list",

@@ -16,7 +16,7 @@
    "fieldname": "work_request_list",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Work Request List",
+   "label": "Work Request",
    "options": "Work Request Form"
   },
   {
@@ -42,7 +42,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-07-11 11:27:53.178639",
+ "modified": "2026-07-11 17:26:19.162885",
  "modified_by": "Administrator",
  "module": "petroka_custom",
  "name": "Work Request List",
