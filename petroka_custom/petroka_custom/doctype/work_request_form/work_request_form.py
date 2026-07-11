@@ -3,12 +3,15 @@
 
 import frappe
 from frappe.model.document import Document
-from frappe.utils import add_days, flt, getdate, today
+from frappe.utils import add_days, getdate, today, flt
 
 class WorkRequestForm(Document):
 
 	def on_submit(self):
 		self.create_leave_allocation()
+
+	def on_cancel(self):
+		self.remove_from_leave_allocation()
 
 	def create_leave_allocation(self):
 		employee = self.employee
@@ -45,6 +48,88 @@ class WorkRequestForm(Document):
 				to_date=to_date,
 			)
 
+	def remove_from_leave_allocation(self):
+		"""
+		Remove this Work Request from its Leave Allocation.
+
+		If no other Work Requests remain, cancel the Leave Allocation.
+		HRMS will automatically handle its Leave Ledger Entry.
+		"""
+
+		allocation_names = frappe.get_all(
+			"Leave Allocation",
+			filters={
+				"employee": self.employee,
+				"leave_type": "Compensatory Off",
+				"docstatus": 1,
+			},
+			pluck="name",
+		)
+
+		for allocation_name in allocation_names:
+			leave_allocation = frappe.get_doc(
+				"Leave Allocation",
+				allocation_name,
+			)
+
+			matching_rows = [
+				row
+				for row in leave_allocation.get(
+					"custom_work_order_list",
+					[],
+				)
+				if row.work_request_list == self.name
+			]
+
+			if not matching_rows:
+				continue
+
+			for row in matching_rows:
+				leave_allocation.remove(row)
+
+			remaining_rows = leave_allocation.get(
+				"custom_work_order_list",
+				[],
+			)
+
+			if not remaining_rows:
+				# HRMS automatically manages the Leave Ledger Entry.
+				leave_allocation.flags.ignore_links = True
+				leave_allocation.cancel()
+
+			else:
+				leave_allocation.flags.ignore_validate_update_after_submit = True
+
+				leave_allocation.new_leaves_allocated = max(
+					flt(leave_allocation.new_leaves_allocated) - 1,
+					0,
+				)
+
+				# Recalculate the allocation period using remaining rows.
+				valid_from_dates = [
+					getdate(row.from_date)
+					for row in remaining_rows
+					if row.from_date
+				]
+
+				valid_to_dates = [
+					getdate(row.to_date)
+					for row in remaining_rows
+					if row.to_date
+				]
+
+				if valid_from_dates:
+					leave_allocation.from_date = min(valid_from_dates)
+
+				if valid_to_dates:
+					leave_allocation.to_date = max(valid_to_dates)
+
+				leave_allocation.save(
+					ignore_permissions=True
+				)
+
+			break
+
 	def update_existing_leave_allocation(
 		self,
 		allocation_name,
@@ -56,7 +141,7 @@ class WorkRequestForm(Document):
 			allocation_name,
 		)
 
-		# Prevent duplicate leave allocation for the same Work Request.
+		# Prevent duplicate allocation for the same Work Request.
 		for row in leave_allocation.get(
 			"custom_work_order_list",
 			[],
@@ -78,7 +163,9 @@ class WorkRequestForm(Document):
 		):
 			leave_allocation.from_date = from_date
 
-		leave_allocation.new_leaves_allocated = 1
+		leave_allocation.new_leaves_allocated = (
+			flt(leave_allocation.new_leaves_allocated) + 1
+		)
 
 		leave_allocation.append(
 			"custom_work_order_list",
@@ -90,7 +177,9 @@ class WorkRequestForm(Document):
 			},
 		)
 
-		leave_allocation.save(ignore_permissions=True)
+		leave_allocation.save(
+			ignore_permissions=True
+		)
 
 	def create_new_leave_allocation(
 		self,
@@ -123,7 +212,6 @@ class WorkRequestForm(Document):
 		)
 
 		leave_allocation.submit()
-
 
 @frappe.whitelist()
 def expire_leave_allocation():
