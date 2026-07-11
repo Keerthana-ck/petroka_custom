@@ -15,8 +15,10 @@
   "section_break_lemp",
   "employee",
   "phone",
+  "date_of_joining",
   "column_break_cgif",
   "designation",
+  "department",
   "email",
   "timeline_section",
   "start_date",
@@ -81,11 +83,13 @@
    "reqd": 1
   },
   {
+   "fetch_from": "employee.cell_number",
    "fieldname": "phone",
-   "fieldtype": "Phone",
+   "fieldtype": "Data",
    "label": "Phone"
   },
   {
+   "fetch_from": "employee.designation",
    "fieldname": "designation",
    "fieldtype": "Link",
    "label": "Designation",
@@ -120,6 +124,7 @@
   {
    "fieldname": "end_date",
    "fieldtype": "Date",
+   "hidden": 1,
    "label": "End Date"
   },
   {
@@ -142,13 +147,26 @@
    "fieldtype": "Select",
    "label": "Works/Job expected to complete (Yes or No)",
    "options": "\nYes\nNo"
+  },
+  {
+   "fetch_from": "employee.date_of_joining",
+   "fieldname": "date_of_joining",
+   "fieldtype": "Data",
+   "label": "Date of Joining"
+  },
+  {
+   "fetch_from": "employee.department",
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-11 10:50:15.662680",
+ "modified": "2026-07-11 14:46:56.797532",
  "modified_by": "Administrator",
  "module": "petroka_custom",
  "name": "Work Request Form",
