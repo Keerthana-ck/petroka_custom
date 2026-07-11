@@ -214,6 +214,7 @@ scheduler_events = {
 #
 auto_cancel_exempted_doctypes = [
 	"Leave Ledger Entry",
+    "Leave Allocation"
 ]
 
 # Ignore links to specified DocTypes when deleting documents
