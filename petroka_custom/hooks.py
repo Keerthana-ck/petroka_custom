@@ -212,7 +212,9 @@ scheduler_events = {
 
 # exempt linked doctypes from being automatically cancelled
 #
-# auto_cancel_exempted_doctypes = ["Auto Repeat"]
+auto_cancel_exempted_doctypes = [
+	"Leave Ledger Entry",
+]
 
 # Ignore links to specified DocTypes when deleting documents
 # -----------------------------------------------------------
