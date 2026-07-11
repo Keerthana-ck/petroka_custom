@@ -1,0 +1,56 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-07-11 10:30:25.026584",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "work_request_list",
+  "from_date",
+  "to_date",
+  "expired"
+ ],
+ "fields": [
+  {
+   "fieldname": "work_request_list",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Work Request List",
+   "options": "Work Request Form"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "From Date"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
+  },
+  {
+   "default": "0",
+   "fieldname": "expired",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Expired"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-07-11 11:27:53.178639",
+ "modified_by": "Administrator",
+ "module": "petroka_custom",
+ "name": "Work Request List",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

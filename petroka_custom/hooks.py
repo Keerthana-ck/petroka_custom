@@ -165,7 +165,8 @@ scheduler_events = {
 #       "petroka_custom.tasks.all"
 #   ],
     "daily": [
-        "petroka_custom.doc_event.expire_leave_allocation"
+        "petroka_custom.doc_event.expire_leave_allocation",
+        "petroka_custom.petroka_custom.doctype.work_request_form.work_request_form.expire_leave_allocation"
     ],
     # "daily": [
     #     "petroka_custom.petroka_custom.custom_script.zkteco.enqueue_sync_zkteco_logs"
