@@ -13,6 +13,30 @@ class WorkRequestForm(Document):
 	def on_cancel(self):
 		self.remove_from_leave_allocation()
 
+	def validate(self):
+		self.validate_document()
+
+	def validate_document(self):
+
+		"""Validate that no other Work Request Form exists for the same Employee and Start Date."""
+
+		existing_work_request = frappe.db.exists(
+			"Work Request Form",
+			{
+				"employee": self.employee,
+				"start_date": self.start_date,
+				"name": ["!=", self.name],
+				"docstatus": ["!=", 2]
+			},
+		)
+
+		if existing_work_request:
+			frappe.throw(
+				f"A Work Request Form already exists for Employee <b>{self.employee}</b> "
+				f"on <b>{frappe.format(self.start_date, {'fieldtype': 'Date'})}</b>."
+			)
+			
+
 	def create_leave_allocation(self):
 		employee = self.employee
 
