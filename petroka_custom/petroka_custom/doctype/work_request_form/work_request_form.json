@@ -8,9 +8,9 @@
  "field_order": [
   "section_break_x406",
   "amended_from",
-  "priority",
-  "column_break_sxmg",
   "project",
+  "column_break_sxmg",
+  "company",
   "section_break_lemp",
   "employee",
   "phone",
@@ -42,14 +42,6 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
-  },
-  {
-   "fieldname": "priority",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Priority",
-   "options": "Open\nWorking\nPending Review\nOverdue\nTemplate\nCompleted\nCancelled",
-   "reqd": 1
   },
   {
    "fieldname": "project",
@@ -88,6 +80,7 @@
    "options": "Designation"
   },
   {
+   "fetch_from": "company.email",
    "fieldname": "email",
    "fieldtype": "Data",
    "label": "Email",
@@ -152,13 +145,19 @@
    "fieldtype": "Link",
    "label": "Department",
    "options": "Department"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-14 10:55:11.984727",
+ "modified": "2026-07-14 17:28:05.352248",
  "modified_by": "Administrator",
  "module": "petroka_custom",
  "name": "Work Request Form",
