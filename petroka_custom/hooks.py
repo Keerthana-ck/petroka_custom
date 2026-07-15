@@ -131,9 +131,11 @@ app_license = "mit"
 # Override standard doctype classes
 
 # Override standard Leave Application validation for future earned leave booking.
-override_doctype_class = {
-    "Leave Application": "petroka_custom.overrides.leave_application.CustomLeaveApplication"
-}
+# override_doctype_class = {
+#     "Leave Application": "petroka_custom.overrides.leave_application.CustomLeaveApplication"
+# }
+
+
 
 # Document Events
 # ---------------
