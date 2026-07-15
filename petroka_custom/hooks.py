@@ -135,8 +135,6 @@ app_license = "mit"
 #     "Leave Application": "petroka_custom.overrides.leave_application.CustomLeaveApplication"
 # }
 
-
-
 # Document Events
 # ---------------
 # Hook on document methods and events
