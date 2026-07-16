@@ -263,6 +263,74 @@ class WorkRequestForm(Document):
 
 		leave_allocation.submit()
 
+	@frappe.whitelist()
+	def get_logged_in_employee_details(self):
+		"""
+		Get the Employee linked to the currently logged-in user.
+		"""
+
+		employee = frappe.db.get_value(
+			"Employee",
+			{
+				"user_id": frappe.session.user,
+				"status": "Active",
+			},
+			[
+				"name",
+				"company",
+			],
+			as_dict=True,
+		)
+
+		if not employee:
+			return None
+
+		company_email = None
+
+		if employee.company:
+			company_email = frappe.db.get_value(
+				"Company",
+				employee.company,
+				"email",
+			)
+
+			# If email is not available directly in Company,
+			# fetch it from the linked Company Address.
+			if not company_email:
+				address = frappe.db.sql(
+					"""
+					SELECT
+						address.email_id
+					FROM
+						`tabAddress` AS address
+					INNER JOIN
+						`tabDynamic Link` AS dynamic_link
+						ON dynamic_link.parent = address.name
+					WHERE
+						dynamic_link.parenttype = 'Address'
+						AND dynamic_link.link_doctype = 'Company'
+						AND dynamic_link.link_name = %(company)s
+						AND IFNULL(address.email_id, '') != ''
+					ORDER BY
+						address.is_primary_address DESC,
+						address.modified DESC
+					LIMIT 1
+					""",
+					{
+						"company": employee.company,
+					},
+					as_dict=True,
+				)
+
+				if address:
+					company_email = address[0].email_id
+
+		return {
+			"employee": employee.name,
+			"company": employee.company,
+			"email": company_email,
+		}
+
 @frappe.whitelist()
 def expire_leave_allocation():
 	"""
