@@ -9,8 +9,10 @@
   "section_break_x406",
   "amended_from",
   "project",
+  "probation_status",
   "column_break_sxmg",
   "company",
+  "branch",
   "section_break_lemp",
   "employee",
   "phone",
@@ -152,13 +154,27 @@
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company"
+  },
+  {
+   "fetch_from": "employee.custom_probation_status",
+   "fieldname": "probation_status",
+   "fieldtype": "Data",
+   "label": "Probation Status",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.branch",
+   "fieldname": "branch",
+   "fieldtype": "Data",
+   "label": "Branch",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-15 09:10:17.403582",
+ "modified": "2026-07-16 11:57:49.463277",
  "modified_by": "Administrator",
  "module": "petroka_custom",
  "name": "Work Request Form",
