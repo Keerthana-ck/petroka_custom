@@ -147,6 +147,7 @@
    "options": "Department"
   },
   {
+   "fetch_from": "employee.company",
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
@@ -157,7 +158,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-14 17:28:05.352248",
+ "modified": "2026-07-15 09:10:17.403582",
  "modified_by": "Administrator",
  "module": "petroka_custom",
  "name": "Work Request Form",

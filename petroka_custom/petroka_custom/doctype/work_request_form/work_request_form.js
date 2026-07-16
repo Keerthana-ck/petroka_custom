@@ -2,9 +2,12 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Work Request Form", {
-    onload(frm) {
-        if (!frm.is_new() && frm.doc.company) {
-            set_company_email(frm);
+    refresh(frm) {
+        if (frm.is_new()) {
+            setTimeout(() => {
+                frm.set_value("company", "");
+                frm.set_value("email", "");
+            }, 100);
         }
     },
 
