@@ -44,7 +44,7 @@ app_license = "mit"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {"Leave Application" : "public/js/leave_application.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -140,8 +140,8 @@ override_doctype_class = {
 # Hook on document methods and events
 doc_events = {
     "Task": {
-        "validate": "petroka_custom.doc_event.create_leave_allocation",
-        "after_insert": "petroka_custom.overrides.task.assign_task_to_creator"
+        "after_insert": "petroka_custom.overrides.task.assign_task_to_creator",
+        "on_update": "petroka_custom.overrides.task.task_assign_to_selected_employee"
     },
     # "Leave Application": {
     #     "validate": "petroka_custom.doc_event.validate_bereavement_leave"
@@ -281,6 +281,15 @@ fixtures = [
         "doctype": "Client Script",
         "filters": [
             ["Client Script", "name", "=", "Zkteco Log List"]
+        ]
+    },
+    {
+        "doctype": "Custom HTML Block",
+        "filters": [
+            ["name", "in", [
+                "Company Policy",
+                "Events"
+            ]]
         ]
     }
 ] 
