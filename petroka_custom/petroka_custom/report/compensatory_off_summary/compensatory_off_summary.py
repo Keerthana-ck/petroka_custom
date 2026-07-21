@@ -57,6 +57,7 @@ def get_columns():
 			"fieldtype": "Link",
 			"options": "Company",
 			"width": 300,
+			"hidden": 1
 		},
 		{
 			"label": _("Total Allocated Leaves"),
@@ -71,6 +72,13 @@ def get_columns():
 			"fieldtype": "Float",
 			"precision": 2,
 			"width": 180,
+		},
+		{
+			"label": _("Leave Taken"),
+			"fieldname": "leave_taken",
+			"fieldtype": "Float",
+			"precision": 2,
+			"width": 150,
 		},
 		{
 			"label": _("Balance Leave"),
@@ -132,6 +140,11 @@ def get_data(filters):
 					END
 				) AS expired_leaves,
 
+				IFNULL(
+					MAX(leave_usage.leave_taken),
+					0
+				) AS leave_taken,
+
 				SUM(
 					CASE
 						WHEN IFNULL(
@@ -152,6 +165,33 @@ def get_data(filters):
 
 			LEFT JOIN `tabEmployee` AS employee
 				ON employee.name = la.employee
+
+			LEFT JOIN (
+				SELECT
+					leave_application.employee,
+					SUM(
+						IFNULL(
+							leave_application.total_leave_days,
+							0
+						)
+					) AS leave_taken
+
+				FROM `tabLeave Application`
+					AS leave_application
+
+				WHERE
+					leave_application.docstatus = 1
+					AND leave_application.leave_type
+						= %(leave_type)s
+					AND leave_application.from_date
+						<= %(to_date)s
+					AND leave_application.to_date
+						>= %(from_date)s
+
+				GROUP BY
+					leave_application.employee
+			) AS leave_usage
+				ON leave_usage.employee = la.employee
 
 			WHERE {" AND ".join(conditions)}
 
@@ -174,6 +214,10 @@ def get_data(filters):
 
 		row.expired_leaves = flt(
 			row.expired_leaves
+		)
+
+		row.leave_taken = flt(
+			row.leave_taken
 		)
 
 		row.balance_leave = flt(
