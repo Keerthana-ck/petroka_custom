@@ -1,14 +1,16 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:event_name",
  "creation": "2026-07-20 12:51:24.676531",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "event_name",
   "event_date",
+  "column_break_ygfd",
   "time",
+  "company",
+  "section_break_wdpn",
   "description"
  ],
  "fields": [
@@ -39,16 +41,29 @@
    "label": "Event Name",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "column_break_ygfd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "section_break_wdpn",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-20 12:53:44.848010",
+ "modified": "2026-07-21 13:38:32.748820",
  "modified_by": "Administrator",
  "module": "petroka_custom",
  "name": "Company Event",
- "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
