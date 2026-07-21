@@ -7,6 +7,9 @@
  "engine": "InnoDB",
  "field_order": [
   "company",
+  "attachment",
+  "column_break_ruax",
+  "section_break_mjmx",
   "policys"
  ],
  "fields": [
@@ -24,12 +27,25 @@
    "fieldtype": "Text Editor",
    "label": "Policys",
    "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ruax",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "attachment",
+   "fieldtype": "Attach",
+   "label": "Attachment"
+  },
+  {
+   "fieldname": "section_break_mjmx",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-20 11:56:55.452770",
+ "modified": "2026-07-21 14:01:55.000242",
  "modified_by": "Administrator",
  "module": "petroka_custom",
  "name": "Company Policy",
