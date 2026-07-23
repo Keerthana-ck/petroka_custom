@@ -20,12 +20,12 @@ def task_assign_to_selected_employee(doc, method=None):
 	old_doc = doc.get_doc_before_save()
 
 	old_employee = (
-		old_doc.custom_employee
+		old_doc.custom_task_assign_to
 		if old_doc
 		else None
 	)
 
-	new_employee = doc.custom_employee
+	new_employee = doc.custom_task_assign_to
 
 	if old_employee == new_employee:
 		return
