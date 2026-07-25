@@ -1,4 +1,13 @@
 frappe.ui.form.on("Leave Application", {
+	setup(frm) {
+		frm.set_query("custom_assigned_replacement", () => {
+			return {
+				filters: {
+					status: "Active",
+				},
+			};
+		});
+	},
 	employee(frm) {
 		fetch_employee_eid(frm);
 	}
