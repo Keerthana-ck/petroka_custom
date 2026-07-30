@@ -271,3 +271,12 @@ def validate_bereavement_leave(doc, method=None):
 		frappe.throw(
 			"Bereavement Leave for Other Relations cannot exceed 3 days."
 		)
+
+def set_hr_manager(doc, method=None):
+    """Set the user who moves the document to Approved."""
+
+    if (
+        doc.workflow_state == "Approved"
+        and doc.has_value_changed("workflow_state")
+    ):
+        doc.hr_manager = frappe.session.user
