@@ -10,7 +10,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letter_head": null,
- "modified": "2026-07-25 18:58:35.140019",
+ "modified": "2026-07-31 15:58:44.648749",
  "modified_by": "Administrator",
  "module": "petroka_custom",
  "name": "Task Summary version-I",
@@ -21,12 +21,6 @@
  "report_name": "Task Summary version-I",
  "report_type": "Script Report",
  "roles": [
-  {
-   "role": "Projects User"
-  },
-  {
-   "role": "Employee Self Service"
-  },
   {
    "role": "System Manager"
   }

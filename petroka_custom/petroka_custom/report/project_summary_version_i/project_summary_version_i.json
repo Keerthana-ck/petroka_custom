@@ -10,7 +10,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letter_head": null,
- "modified": "2026-07-25 18:40:08.667258",
+ "modified": "2026-07-31 15:59:51.208888",
  "modified_by": "Administrator",
  "module": "petroka_custom",
  "name": "Project Summary Version-I",
@@ -22,15 +22,6 @@
  "roles": [
   {
    "role": "Projects Manager"
-  },
-  {
-   "role": "Employee"
-  },
-  {
-   "role": "Projects User"
-  },
-  {
-   "role": "Employee Self Service"
   }
  ],
  "timeout": 0
