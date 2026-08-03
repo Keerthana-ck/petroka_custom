@@ -1,5 +1,47 @@
 import frappe
-import json
+# import json
+from frappe import _
+from frappe.utils import add_years, formatdate, getdate
+
+def validate_air_ticket_allowance(doc, method=None):
+    air_ticket_expenses = [
+        expense
+        for expense in (doc.expenses or [])
+        if expense.expense_type == "Air Ticket Allowance"
+    ]
+
+    if not air_ticket_expenses:
+        return
+
+    if not doc.employee:
+        frappe.throw(
+            _("Employee is required for Air Ticket Allowance.")
+        )
+
+    if not doc.custom_date_of_joining:
+        frappe.throw(
+            _("Date of Joining is required for Air Ticket Allowance.")
+        )
+
+    joining_date = getdate(doc.custom_date_of_joining)
+    eligibility_date = add_years(joining_date, 1)
+
+    for expense in air_ticket_expenses:
+        if not expense.expense_date:
+            frappe.throw(
+                _("Expense Date is required for Air Ticket Allowance.")
+            )
+
+        expense_date = getdate(expense.expense_date)
+
+        if expense_date < eligibility_date:
+            frappe.throw(
+                _(
+                    "Air Ticket Allowance can only be claimed after completing "
+                    "one year in the company. The employee becomes eligible on {0}."
+                ).format(formatdate(eligibility_date))
+            )
+            
 # from frappe.utils import (
 # 	getdate,
 # 	today,

@@ -159,6 +159,9 @@ doc_events = {
     },
     "Employee Certificates and Documents":{
         "validate": "petroka_custom.doc_event.set_hr_manager"
+    },
+    "Expense Claim": {
+        "validate": "petroka_custom.doc_event.validate_air_ticket_allowance",
     }
 }
 
