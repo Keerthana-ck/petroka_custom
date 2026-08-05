@@ -162,6 +162,10 @@ doc_events = {
     },
     "Expense Claim": {
         "validate": "petroka_custom.doc_event.validate_air_ticket_allowance",
+        "after_insert": "petroka_custom.doc_event.set_last_air_ticket_claim_date"
+    },
+    "Timesheet" : {
+        "validate": "petroka_custom.doc_event.validate_timesheet_date"
     }
 }
 
