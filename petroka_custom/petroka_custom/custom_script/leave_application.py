@@ -97,43 +97,43 @@
 #         )
 
 
-from frappe.utils import getdate, today
-import frappe
+# from frappe.utils import getdate, today
+# import frappe
 
 
-def validate_future_draft_leave(doc, method=None):
+# def validate_future_draft_leave(doc, method=None):
 
-    # Current leave future date ke liye honi chahiye
-    if getdate(doc.from_date) <= getdate(today()):
-        return
+#     # Current leave future date ke liye honi chahiye
+#     if getdate(doc.from_date) <= getdate(today()):
+#         return
 
-    # Existing future draft leave check
-    existing_leave = frappe.db.get_value(
-        "Leave Application",
-        {
-            "employee": doc.employee,
-            "docstatus": 0,
-            "name": ["!=", doc.name],
-            "from_date": [">", today()]
-        },
-        ["name", "from_date", "to_date"],
-        as_dict=True
-    )
+#     # Existing future draft leave check
+#     existing_leave = frappe.db.get_value(
+#         "Leave Application",
+#         {
+#             "employee": doc.employee,
+#             "docstatus": 0,
+#             "name": ["!=", doc.name],
+#             "from_date": [">", today()]
+#         },
+#         ["name", "from_date", "to_date"],
+#         as_dict=True
+#     )
 
-    if existing_leave:
+#     if existing_leave:
 
-        leave_link = frappe.utils.get_link_to_form(
-            "Leave Application",
-            existing_leave.name
-        )
+#         leave_link = frappe.utils.get_link_to_form(
+#             "Leave Application",
+#             existing_leave.name
+#         )
 
-        frappe.throw(
-            f"""
-            You already have a future leave application in Draft status.<br><br>
+#         frappe.throw(
+#             f"""
+#             You already have a future leave application in Draft status.<br><br>
 
-            Existing Draft Leave: {leave_link}<br>
-            Leave Period: <b>{existing_leave.from_date}</b> to <b>{existing_leave.to_date}</b><br><br>
+#             Existing Draft Leave: {leave_link}<br>
+#             Leave Period: <b>{existing_leave.from_date}</b> to <b>{existing_leave.to_date}</b><br><br>
 
-            Please contact your manager or leave approver to review and submit/cancel the existing leave application before applying for another future leave.
-            """
-        )
+#             Please contact your manager or leave approver to review and submit/cancel the existing leave application before applying for another future leave.
+#             """
+#         )
