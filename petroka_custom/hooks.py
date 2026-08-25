@@ -154,7 +154,7 @@ doc_events = {
     "Leave Application": {
         "validate": [
             "petroka_custom.doc_event.validate_bereavement_leave",
-            "petroka_custom.petroka_custom.custom_script.leave_application.validate_future_draft_leave"
+            # "petroka_custom.petroka_custom.custom_script.leave_application.validate_future_draft_leave"
         ]
     },
     "Employee Certificates and Documents":{
