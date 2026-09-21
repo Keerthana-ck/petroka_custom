@@ -60,6 +60,13 @@ def get_columns():
 			"width": 120,
 		},
 		{
+			"fieldname": "employee_working_hours",
+			"label": _("Employee Working Hours"),
+			"fieldtype": "Float",
+			"precision": 3,
+			"width": 170,
+		},
+		{
 			"fieldname": "remaining_hours",
 			"label": _("Remaining Hours"),
 			"fieldtype": "Float",
@@ -139,6 +146,11 @@ def get_data(filters):
 				0
 			) AS actual_hours,
 
+			COALESCE(
+				employee_hours.working_hours,
+				0
+			) AS employee_working_hours,
+
 			(
 				COALESCE(task.expected_time, 0)
 				-
@@ -181,6 +193,31 @@ def get_data(filters):
 
 		LEFT JOIN `tabEmployee` AS employee
 			ON employee.user_id = assignment.allocated_to
+
+		LEFT JOIN (
+			SELECT
+				timesheet.employee AS employee,
+				detail.task AS task,
+				SUM(
+					COALESCE(detail.hours, 0)
+				) AS working_hours
+
+			FROM `tabTimesheet Detail` AS detail
+
+			INNER JOIN `tabTimesheet` AS timesheet
+				ON timesheet.name = detail.parent
+
+			WHERE
+				timesheet.docstatus = 1
+				AND detail.task IS NOT NULL
+				AND detail.task != ''
+
+			GROUP BY
+				timesheet.employee,
+				detail.task
+		) AS employee_hours
+			ON employee_hours.task = task.name
+			AND employee_hours.employee = employee.name
 
 		WHERE {condition_string}
 
