@@ -200,6 +200,9 @@ scheduler_events = {
         ],
         "0 23 * * *": [
             "petroka_custom.petroka_custom.custom_script.zkteco.enqueue_sync_zkteco_logs"
+        ],
+        "*/10 * * * *": [
+            "petroka_custom.petroka_custom.custom_script.cleanup_old_logs.cleanup_old_logs"
         ]
     }
    

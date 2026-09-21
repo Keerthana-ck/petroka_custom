@@ -489,14 +489,14 @@ def create_employee_checkin(employee, time, log_type, shift_type):
                 "log_type": log_type
             }
         )
-
+# ++++++++++++++++++++++++++shivam 21/09/26+++++++++++
         if exists:
-            frappe.log_error(
-                message=f"Duplicate skipped: {employee} | {time} | {log_type}",
-                title="ZKTeco Employee Checkin Duplicate"
-            )
+            # frappe.log_error(
+            #     message=f"Duplicate skipped: {employee} | {time} | {log_type}",
+            #     title="ZKTeco Employee Checkin Duplicate"
+            # )
             return False
-
+# ++++++++++++++++++++++++++++++++++++++++
         # Prepare Employee Checkin data
         doc_data = {
             "doctype": "Employee Checkin",

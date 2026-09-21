@@ -77,19 +77,21 @@ def fetch_and_process_data():
     total_inserted = 0
     total_skipped = 0
     total_failed = 0
+# ++++++++++++++++++++++++++shivam 21/09/26+++++++++++
 
-    frappe.log_error(
-        f"""
-        ZKTeco Employee Wise Sync Started
+    # frappe.log_error(
+    #     f"""
+    #     ZKTeco Employee Wise Sync Started
 
-        Employees:
-        {len(employees)}
+    #     Employees:
+    #     {len(employees)}
 
-        End Time:
-        {end_time}
-        """,
-        "Petroka ZKTeco Sync Started"
-    )
+    #     End Time:
+    #     {end_time}
+    #     """,
+    #     "Petroka ZKTeco Sync Started"
+    # )
+# ++++++++++++++++++++++++++++++++++++++++
 
     for emp in employees:
         employee = emp.name
@@ -304,34 +306,36 @@ def sync_single_employee(
 
         page += 1
         sleep(1)
+# ++++++++++++++++++++++++++shivam 21/09/26+++++++++++
 
-    frappe.log_error(
-        f"""
-        Employee Sync Finished
+    # frappe.log_error(
+    #     f"""
+    #     Employee Sync Finished
 
-        Employee:
-        {employee}
+    #     Employee:
+    #     {employee}
 
-        Employee Name:
-        {employee_name}
+    #     Employee Name:
+    #     {employee_name}
 
-        Device ID:
-        {device_id}
+    #     Device ID:
+    #     {device_id}
 
-        Start Time:
-        {start_time}
+    #     Start Time:
+    #     {start_time}
 
-        End Time:
-        {end_time}
+    #     End Time:
+    #     {end_time}
 
-        Inserted:
-        {inserted_count}
+    #     Inserted:
+    #     {inserted_count}
 
-        Skipped:
-        {skipped_count}
-        """,
-        "Petroka ZKTeco Employee Sync Finished"
-    )
+    #     Skipped:
+    #     {skipped_count}
+    #     """,
+    #     "Petroka ZKTeco Employee Sync Finished"
+    # )
+# ++++++++++++++++++++++++++++++++++++++++
 
     return {
         "inserted": inserted_count,
