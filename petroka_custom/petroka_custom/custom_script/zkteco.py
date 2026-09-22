@@ -335,10 +335,10 @@ def sync_zkteco_logs():
             )
 
             if employee_status != "Active":
-                frappe.log_error(
-                    message=f"Skipped inactive employee: {employee}",
-                    title="ZKTeco Inactive Employee Skipped"
-                )
+                # frappe.log_error(
+                #     message=f"Skipped inactive employee: {employee}",
+                #     title="ZKTeco Inactive Employee Skipped"
+                # )
                 continue
 
             for date, logs in logs_by_date.items():
@@ -474,10 +474,10 @@ def create_employee_checkin(employee, time, log_type, shift_type):
         )
 
         if employee_status != "Active":
-            frappe.log_error(
-                message=f"Skipped inactive employee: {employee}",
-                title="ZKTeco Inactive Employee Skipped"
-            )
+            # frappe.log_error(
+            #     message=f"Skipped inactive employee: {employee}",
+            #     title="ZKTeco Inactive Employee Skipped"
+            # )
             return False
 
         # Check duplicate entry
@@ -517,10 +517,10 @@ def create_employee_checkin(employee, time, log_type, shift_type):
         doc = frappe.get_doc(doc_data)
         doc.insert(ignore_permissions=True)
 
-        frappe.log_error(
-            message=f"Employee Checkin created: {doc.name} | {employee} | {time} | {log_type}",
-            title="ZKTeco Employee Checkin Created"
-        )
+        # frappe.log_error(
+        #     message=f"Employee Checkin created: {doc.name} | {employee} | {time} | {log_type}",
+        #     title="ZKTeco Employee Checkin Created"
+        # )
 
         return True
 

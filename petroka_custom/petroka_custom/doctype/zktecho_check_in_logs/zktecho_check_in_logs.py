@@ -122,30 +122,30 @@ def fetch_and_process_data():
                 frappe.get_traceback(),
                 f"Petroka ZKTeco Employee Sync Failed - {employee}"
             )
+# ++++++++++++++++++++++++++shivam 21/09/26+++++++++++
+    # frappe.log_error(
+    #     f"""
+    #     ZKTeco Employee Wise Sync Finished
 
-    frappe.log_error(
-        f"""
-        ZKTeco Employee Wise Sync Finished
+    #     Employees:
+    #     {len(employees)}
 
-        Employees:
-        {len(employees)}
+    #     Total Inserted:
+    #     {total_inserted}
 
-        Total Inserted:
-        {total_inserted}
+    #     Total Skipped:
+    #     {total_skipped}
 
-        Total Skipped:
-        {total_skipped}
+    #     Total Failed Employees:
+    #     {total_failed}
 
-        Total Failed Employees:
-        {total_failed}
+    #     End Time:
+    #     {end_time}
+    #     """,
+    #     "Petroka ZKTeco Sync Finished"
+    # )
 
-        End Time:
-        {end_time}
-        """,
-        "Petroka ZKTeco Sync Finished"
-    )
-
-
+# +++++++++++++++++++++++++++++++++++++
 def sync_single_employee(
     base_url,
     headers,
@@ -179,29 +179,29 @@ def sync_single_employee(
     page = 1
     inserted_count = 0
     skipped_count = 0
+# ++++++++++++++++++++++++++shivam 21/09/26+++++++++++
+    # frappe.log_error(
+    #     f"""
+    #     Employee Sync Started
 
-    frappe.log_error(
-        f"""
-        Employee Sync Started
+    #     Employee:
+    #     {employee}
 
-        Employee:
-        {employee}
+    #     Employee Name:
+    #     {employee_name}
 
-        Employee Name:
-        {employee_name}
+    #     Device ID:
+    #     {device_id}
 
-        Device ID:
-        {device_id}
+    #     Start Time:
+    #     {start_time}
 
-        Start Time:
-        {start_time}
-
-        End Time:
-        {end_time}
-        """,
-        "Petroka ZKTeco Employee Sync Started"
-    )
-
+    #     End Time:
+    #     {end_time}
+    #     """,
+    #     "Petroka ZKTeco Employee Sync Started"
+    # )
+# +++++++++++++++++++++++++++++++++++++
     while True:
         params = {
             "page": page,
@@ -222,30 +222,30 @@ def sync_single_employee(
         )
 
         if response.status_code != 200:
-            frappe.log_error(
-                f"""
-                Failed to fetch employee transactions
+            # frappe.log_error(
+            #     f"""
+            #     Failed to fetch employee transactions
 
-                Employee:
-                {employee}
+            #     Employee:
+            #     {employee}
 
-                Device ID:
-                {device_id}
+            #     Device ID:
+            #     {device_id}
 
-                Page:
-                {page}
+            #     Page:
+            #     {page}
 
-                Status Code:
-                {response.status_code}
+            #     Status Code:
+            #     {response.status_code}
 
-                URL:
-                {response.url}
+            #     URL:
+            #     {response.url}
 
-                Response:
-                {response.text[:3000]}
-                """,
-                "Petroka ZKTeco API Error"
-            )
+            #     Response:
+            #     {response.text[:3000]}
+            #     """,
+            #     "Petroka ZKTeco API Error"
+            # )
 
             print(f"❌ Failed: {employee} | Device ID: {device_id} | Page: {page}")
             break
@@ -253,27 +253,27 @@ def sync_single_employee(
         try:
             data = response.json()
         except Exception:
-            frappe.log_error(
-                f"""
-                API returned invalid JSON
+            # frappe.log_error(
+            #     f"""
+            #     API returned invalid JSON
 
-                Employee:
-                {employee}
+            #     Employee:
+            #     {employee}
 
-                Device ID:
-                {device_id}
+            #     Device ID:
+            #     {device_id}
 
-                Page:
-                {page}
+            #     Page:
+            #     {page}
 
-                URL:
-                {response.url}
+            #     URL:
+            #     {response.url}
 
-                Response:
-                {response.text[:3000]}
-                """,
-                "Petroka ZKTeco Invalid JSON Response"
-            )
+            #     Response:
+            #     {response.text[:3000]}
+            #     """,
+            #     "Petroka ZKTeco Invalid JSON Response"
+            # )
             break
 
         records = data.get("data", [])
@@ -375,21 +375,21 @@ def process_record(record, forced_employee=None, expected_emp_code=None):
         return "skipped"
 
     if expected_emp_code and emp_code != str(expected_emp_code).strip():
-        frappe.log_error(
-            f"""
-            Skipped record because emp_code mismatch.
+        # frappe.log_error(
+        #     f"""
+        #     Skipped record because emp_code mismatch.
 
-            Expected Device ID:
-            {expected_emp_code}
+        #     Expected Device ID:
+        #     {expected_emp_code}
 
-            Record emp_code:
-            {emp_code}
+        #     Record emp_code:
+        #     {emp_code}
 
-            Record:
-            {record}
-            """,
-            "Petroka ZKTeco Emp Code Mismatch"
-        )
+        #     Record:
+        #     {record}
+        #     """,
+        #     "Petroka ZKTeco Emp Code Mismatch"
+        # )
         return "skipped"
 
     if forced_employee:
@@ -404,24 +404,24 @@ def process_record(record, forced_employee=None, expected_emp_code=None):
         )
 
     if not employee:
-        frappe.log_error(
-            f"""
-            No Employee found for attendance_device_id.
+        # frappe.log_error(
+        #     f"""
+        #     No Employee found for attendance_device_id.
 
-            ZKTeco emp_code:
-            {emp_code}
+        #     ZKTeco emp_code:
+        #     {emp_code}
 
-            Name from API:
-            {first_name}
+        #     Name from API:
+        #     {first_name}
 
-            Department from API:
-            {department}
+        #     Department from API:
+        #     {department}
 
-            Punch Time:
-            {punch_time}
-            """,
-            "Petroka ZKTeco Employee Mapping Error"
-        )
+        #     Punch Time:
+        #     {punch_time}
+        #     """,
+        #     "Petroka ZKTeco Employee Mapping Error"
+        # )
 
         print(f"⚠️ Employee not found for attendance_device_id: {emp_code}")
         return "skipped"
