@@ -1,0 +1,116 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-09-29 14:13:36.715054",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "leave_type",
+  "annual_allocation",
+  "column_break_nttw",
+  "allocation_based_on",
+  "do_not_allocate",
+  "leave_accrual_method",
+  "ref",
+  "section_break_uyhh",
+  "is_opening_entry",
+  "leave_till_date",
+  "column_break_deas",
+  "opening_leave_balance"
+ ],
+ "fields": [
+  {
+   "fieldname": "leave_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Leave Type",
+   "options": "Leave Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "annual_allocation",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Annual Allocation",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_nttw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "allocation_based_on",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Allocation Based On",
+   "options": "\nJoining Date\nCalendar Year\nContract Based",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "do_not_allocate",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Do not allocate leave when the employee is on leave (paid or unpaid)"
+  },
+  {
+   "fieldname": "leave_accrual_method",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Leave Accrual Method",
+   "options": "\nDaily Allocation\nYearly Allocation\nMonthly Equal Distribution\nBased on Custom Condition",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval: doc.leave == \"Based on Custom Condition\"",
+   "fieldname": "ref",
+   "fieldtype": "HTML",
+   "options": "<div style=\"border:1px solid black;background-color:#f9f9f9;font-weight:bold;\">Under the custom condition, 30 days of annual leave are allocated per year: no leave in the first 6 months, 12 days in the 7th month, 2 days per month for months 8\u201311, 10 days in the 12th month, then 2.5 days per month thereafter.</div>",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_uyhh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_opening_entry",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Opening Entry"
+  },
+  {
+   "depends_on": "eval: doc.is_opening_entry ==  1",
+   "fieldname": "leave_till_date",
+   "fieldtype": "Date",
+   "label": "Leave Till Date",
+   "mandatory_depends_on": "eval: doc.is_opening_entry ==  1"
+  },
+  {
+   "fieldname": "column_break_deas",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: doc.is_opening_entry ==  1",
+   "fieldname": "opening_leave_balance",
+   "fieldtype": "Float",
+   "label": "Opening Leave Balance",
+   "mandatory_depends_on": "eval: doc.is_opening_entry ==  1"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-09-29 14:13:36.715054",
+ "modified_by": "Administrator",
+ "module": "petroka_custom",
+ "name": "Leave Type List",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

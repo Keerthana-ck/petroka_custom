@@ -1,7 +1,7 @@
 import frappe
 # import json
 from frappe import _
-from frappe.utils import add_years, formatdate, add_days, getdate, nowdate
+from frappe.utils import add_years, formatdate, add_days, getdate, nowdate, today
 
 def validate_air_ticket_allowance(doc, method=None):
     air_ticket_expenses = [
@@ -155,3 +155,86 @@ def set_hr_manager(doc, method=None):
         and doc.has_value_changed("workflow_state")
     ):
         doc.hr_manager = frappe.session.user
+
+
+@frappe.whitelist()
+def create_leave_allocation_setup(doc, method=None):
+    """
+    Create an Employee Leave Allocation Setup from the selected
+    Leave Allocation Setup Template when an Employee is saved.
+    """
+
+    if not doc.get("custom_create_leave_allocation"):
+        return
+
+    template_name = doc.get(
+        "custom_leave_allocation_setup_template"
+    )
+
+    if not template_name:
+        return
+
+    existing_setup = frappe.db.exists(
+        "Employee Leave Allocation Setup",
+        {
+            "employee": doc.name,
+            "status": "Active",
+            "docstatus": ["<", 2],
+        },
+    )
+
+    if existing_setup:
+        frappe.throw(
+            _("An active Employee Leave Allocation Setup already exists for Employee {0}.").format(
+                frappe.bold(doc.name)
+            ),
+            title=_("Active Leave Allocation Setup Exists"),
+        )
+
+    template = frappe.get_doc(
+        "Leave Allocation Setup Template",
+        template_name,
+    )
+
+    template_rows = template.get("leave_type_lists") or []
+
+    if not template_rows:
+        frappe.throw(
+            f"No leave type rows found in template {template.name}."
+        )
+
+    leave_allocation_setup = frappe.new_doc(
+        "Employee Leave Allocation Setup"
+    )
+
+    leave_allocation_setup.employee = doc.name
+    leave_allocation_setup.company = doc.company
+    leave_allocation_setup.posting_date = today()
+    leave_allocation_setup.date_of_joining = doc.date_of_joining
+    leave_allocation_setup.status = "Active"
+
+    for row in template_rows:
+        leave_allocation_setup.append(
+            "details",
+            {
+                "leave_type": row.get("leave_type"),
+                "annual_allocation": row.get("annual_allocation"),
+                "allocation_based_on": row.get(
+                    "allocation_based_on"
+                ),
+                "do_not_allocate": row.get("do_not_allocate"),
+                "leave_accrual_method": row.get(
+                    "leave_accrual_method"
+                ),
+                "is_opening_entry": row.get("is_opening_entry"),
+                "leave_till_date": row.get("leave_till_date"),
+                "opening_leave_balance": row.get(
+                    "opening_leave_balance"
+                ),
+            },
+        )
+
+    leave_allocation_setup.insert(ignore_permissions=True)
+    leave_allocation_setup.submit()
+
+    return leave_allocation_setup.name
