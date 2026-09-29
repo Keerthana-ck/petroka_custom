@@ -166,7 +166,11 @@ doc_events = {
     },
     "Timesheet" : {
         "validate": "petroka_custom.doc_event.validate_timesheet_date"
+    },
+    "Employee": {
+        "validate": "petroka_custom.doc_event.create_leave_allocation_setup"
     }
+
 }
 
 # Scheduled Tasks
