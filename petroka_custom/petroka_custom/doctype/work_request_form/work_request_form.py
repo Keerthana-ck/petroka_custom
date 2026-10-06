@@ -18,7 +18,7 @@ class WorkRequestForm(Document):
 
 	def validate_document(self):
 
-		"""Validate that no other Work Request Form exists for the same Employee and Start Date."""
+		"""Validate Work Request Form."""
 
 		existing_work_request = frappe.db.exists(
 			"Work Request Form",
@@ -26,7 +26,7 @@ class WorkRequestForm(Document):
 				"employee": self.employee,
 				"start_date": self.start_date,
 				"name": ["!=", self.name],
-				"docstatus": ["!=", 2]
+				"docstatus": ["!=", 2],
 			},
 		)
 
@@ -35,6 +35,32 @@ class WorkRequestForm(Document):
 				f"A Work Request Form already exists for Employee <b>{self.employee}</b> "
 				f"on <b>{frappe.format(self.start_date, {'fieldtype': 'Date'})}</b>."
 			)
+
+		if self.docstatus == 1 and self.employee and self.start_date:
+
+			previous_work_request = frappe.db.exists(
+				"Work Request Form",
+				{
+					"employee": self.employee,
+					"start_date": ["<", self.start_date],
+					"name": ["!=", self.name],
+					"docstatus": 0,
+				},
+			)
+
+			if previous_work_request:
+				previous_date = frappe.db.get_value(
+					"Work Request Form",
+					previous_work_request,
+					"start_date",
+				)
+
+				frappe.throw(
+					f"Please approve the previous Work Request Form "
+					f"for Employee <b>{self.employee}</b> dated "
+					f"<b>{frappe.format(previous_date, {'fieldtype': 'Date'})}</b> "
+					f"before approving this Work Request."
+				)
 			
 
 	def create_leave_allocation(self):
