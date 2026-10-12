@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
-from frappe.utils import add_days, flt, getdate, today
+from frappe.utils import add_days, flt, getdate, today, add_years
 
 class WorkRequestForm(Document):
 
@@ -72,7 +72,7 @@ class WorkRequestForm(Document):
 			)
 
 		from_date = getdate(self.start_date or today())
-		to_date = add_days(from_date, 90)
+		to_date = add_years(from_date, 5)
 
 		allocation_name = frappe.db.exists(
 			"Leave Allocation",
